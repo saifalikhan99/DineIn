@@ -3,7 +3,7 @@
 DineIn is a food ordering and delivery platform built using Django 3.1. It is designed to streamline food delivery within a university campus by providing distinct functionalities for admins, vendors, and users. The system is modular, comprising three key components: Admin Module, Vendor Module, and User Module.
 
 ---
-<img src = "https://raw.githubusercontent.com/ariz565/Learning---AI-ML/refs/heads/main/WhatsApp%20Image%202025-01-10%20at%2017.16.27_779cdc1d.jpg?token=GHSAT0AAAAAACPVIOCFBVZA2Q2DRVNVRJCIZ4BC4GQ">
+<img src = "https://raw.githubusercontent.com/ariz565/Learning---AI-ML/refs/heads/main/WhatsApp%20Image%202025-01-10%20at%2017.16.27_779cdc1d.jpg?token=GHSAT0AAAAAACPVIOCERFMKRINBIOZ2U7HQZ6AIS4A">
 
 ## Functional Requirements
 
