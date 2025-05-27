@@ -1,0 +1,317 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+{% include 'includes/alerts.html' %}
+
+<!-- Main Section Start -->
+<div class="main-section">
+    {% include 'includes/cover.html' %}
+    <div class="page-section account-header buyer-logged-in">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                    <!-- Load the sidebar here -->
+                    {% include 'includes/v_sidebar.html' %}
+                </div>
+                <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
+                    <div class="user-dashboard loader-holder">
+                        <div class="user-holder">
+                            <h5 class="text-uppercase">
+                                {% if coupon %}Edit Coupon{% else %}Create New Coupon{% endif %}
+                            </h5>
+                            
+                            <!-- Back to Coupons -->
+                            <div class="row mb-3">
+                                <div class="col-lg-12">
+                                    <a href="{% url 'coupon_list' %}" class="btn btn-secondary">
+                                        <i class="fa fa-arrow-left"></i> Back to Coupons
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Coupon Form -->
+                            <form method="POST" class="form">
+                                {% csrf_token %}
+                                <div class="form-fields-set">
+                                    <ul>
+                                        <!-- Coupon Code -->
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                    <div class="field-holder">
+                                                        <label>Coupon Code *</label>
+                                                        {{ form.code }}
+                                                        {% if form.code.errors %}
+                                                            <ul class="errorlist">
+                                                                {% for error in form.code.errors %}
+                                                                    <li style="color: red;">{{ error }}</li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        {% endif %}
+                                                        <small class="text-muted">Unique code that customers will use</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>                                        <!-- Description -->
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                    <div class="field-holder">
+                                                        <label>Description</label>
+                                                        {{ form.name }}
+                                                        {% if form.name.errors %}
+                                                            <ul class="errorlist">
+                                                                {% for error in form.name.errors %}
+                                                                    <li style="color: red;">{{ error }}</li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        {% endif %}
+                                                        <small class="text-muted">Optional description for internal use</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <!-- Discount Type -->
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                                    <div class="field-holder">
+                                                        <label>Discount Type *</label>
+                                                        {{ form.discount_type }}
+                                                        {% if form.discount_type.errors %}
+                                                            <ul class="errorlist">
+                                                                {% for error in form.discount_type.errors %}
+                                                                    <li style="color: red;">{{ error }}</li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                                    <div class="field-holder">
+                                                        <label>Discount Amount *</label>
+                                                        {{ form.discount_value }}
+                                                        {% if form.discount_value.errors %}
+                                                            <ul class="errorlist">
+                                                                {% for error in form.discount_value.errors %}
+                                                                    <li style="color: red;">{{ error }}</li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        {% endif %}
+                                                        <small class="text-muted" id="discount-help">Enter percentage (1-100) or fixed amount</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <!-- Max Discount and Min Order -->
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                                    <div class="field-holder">
+                                                        <label>Maximum Discount Amount</label>
+                                                        {{ form.maximum_discount_amount }}
+                                                        {% if form.maximum_discount_amount.errors %}
+                                                            <ul class="errorlist">
+                                                                {% for error in form.maximum_discount_amount.errors %}
+                                                                    <li style="color: red;">{{ error }}</li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        {% endif %}
+                                                        <small class="text-muted">For percentage discounts only</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                                    <div class="field-holder">
+                                                        <label>Minimum Order Amount</label>
+                                                        {{ form.minimum_order_amount }}
+                                                        {% if form.minimum_order_amount.errors %}
+                                                            <ul class="errorlist">
+                                                                {% for error in form.minimum_order_amount.errors %}
+                                                                    <li style="color: red;">{{ error }}</li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        {% endif %}
+                                                        <small class="text-muted">Minimum order value required</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <!-- Validity Dates -->
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                                    <div class="field-holder">
+                                                        <label>Valid From *</label>
+                                                        {{ form.valid_from }}
+                                                        {% if form.valid_from.errors %}
+                                                            <ul class="errorlist">
+                                                                {% for error in form.valid_from.errors %}
+                                                                    <li style="color: red;">{{ error }}</li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                                    <div class="field-holder">
+                                                        <label>Valid To *</label>
+                                                        {{ form.valid_until }}
+                                                        {% if form.valid_until.errors %}
+                                                            <ul class="errorlist">
+                                                                {% for error in form.valid_until.errors %}
+                                                                    <li style="color: red;">{{ error }}</li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <!-- Usage Limits -->
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                                    <div class="field-holder">
+                                                        <label>Total Usage Limit</label>
+                                                        {{ form.usage_limit }}
+                                                        {% if form.usage_limit.errors %}
+                                                            <ul class="errorlist">
+                                                                {% for error in form.usage_limit.errors %}
+                                                                    <li style="color: red;">{{ error }}</li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        {% endif %}
+                                                        <small class="text-muted">Leave empty for unlimited</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                                    <div class="field-holder">
+                                                        <label>Usage Limit Per User</label>
+                                                        {{ form.usage_limit_per_user }}
+                                                        {% if form.usage_limit_per_user.errors %}
+                                                            <ul class="errorlist">
+                                                                {% for error in form.usage_limit_per_user.errors %}
+                                                                    <li style="color: red;">{{ error }}</li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        {% endif %}
+                                                        <small class="text-muted">Leave empty for unlimited</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <!-- Active Status -->
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                    <div class="field-holder">
+                                                        <label>
+                                                            {{ form.is_active }} Active
+                                                        </label>
+                                                        {% if form.is_active.errors %}
+                                                            <ul class="errorlist">
+                                                                {% for error in form.is_active.errors %}
+                                                                    <li style="color: red;">{{ error }}</li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        {% endif %}
+                                                        <small class="text-muted">Uncheck to disable this coupon</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+
+                                        <!-- Submit Button -->
+                                        <li>
+                                            <div class="row">
+                                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                    <div class="field-holder">
+                                                        <div class="payment-holder">
+                                                            <input type="submit" value="{% if coupon %}Update Coupon{% else %}Create Coupon{% endif %}" id="btn-next-payment" class="bgcolor">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Main Section End -->
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const discountTypeField = document.getElementById('id_discount_type');
+    const maxDiscountField = document.getElementById('id_maximum_discount_amount');
+    const helpText = document.getElementById('discount-help');
+    const maxDiscountContainer = maxDiscountField ? maxDiscountField.closest('.field-holder') : null;
+    
+    function toggleMaxDiscount() {
+        if (discountTypeField && maxDiscountContainer) {
+            if (discountTypeField.value === 'PERCENTAGE') {
+                maxDiscountContainer.style.display = 'block';
+                helpText.textContent = 'Enter percentage (1-100)';
+            } else {
+                maxDiscountContainer.style.display = 'none';
+                if (maxDiscountField) maxDiscountField.value = '';
+                helpText.textContent = 'Enter fixed dollar amount';
+            }
+        }
+    }
+    
+    if (discountTypeField) {
+        discountTypeField.addEventListener('change', toggleMaxDiscount);
+        toggleMaxDiscount(); // Initial call
+    }
+    
+    // Handle datetime-local inputs
+    const validFromField = document.getElementById('id_valid_from');
+    const validToField = document.getElementById('id_valid_until');
+    
+    if (validFromField && validToField) {
+        // Get current date and time in the correct format for datetime-local
+        const now = new Date();
+        // Adjust for timezone offset to get local time
+        const localDateTime = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
+        const currentDateTime = localDateTime.toISOString().slice(0, 16);
+        
+        // Set minimum date to current time if field is empty
+        if (!validFromField.value) {
+            validFromField.value = currentDateTime;
+        }
+        validFromField.setAttribute('min', currentDateTime);
+        
+        // Set default for valid until if empty (30 days from now)
+        if (!validToField.value) {
+            const futureDate = new Date(now.getTime() + (30 * 24 * 60 * 60 * 1000) - (now.getTimezoneOffset() * 60000));
+            validToField.value = futureDate.toISOString().slice(0, 16);
+        }
+        
+        validFromField.addEventListener('change', function() {
+            // Set minimum for valid_until to be the same as valid_from
+            validToField.setAttribute('min', this.value);
+            if (validToField.value && validToField.value <= this.value) {
+                // If valid_until is before or equal to valid_from, set it to 1 hour later
+                const fromDate = new Date(this.value);
+                fromDate.setHours(fromDate.getHours() + 1);
+                const adjustedDateTime = new Date(fromDate.getTime() - (fromDate.getTimezoneOffset() * 60000));
+                validToField.value = adjustedDateTime.toISOString().slice(0, 16);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

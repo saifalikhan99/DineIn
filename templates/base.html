@@ -37,18 +37,18 @@
     <!-- JAVASCRIPT -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="{% static 'js/modernizr.js' %}"></script>
-    <script src="{% static 'js/bootstrap.js' %}"></script>
-
-    <link rel="stylesheet" href="{% static 'css/custom.css' %}" />
-
+    <script src="{% static 'js/bootstrap.js' %}"></script>    <link rel="stylesheet" href="{% static 'css/custom.css' %}" />
+    
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="{% static 'js/custom.js' %}"></script>
+    
     {% if '/' == request.path or 'profile' in request.path %}
     <script
-      src="https://maps.googleapis.com/maps/api/js?key={{GOOGLE_API_KEY}}&libraries=places&callback=initAutoComplete"
+      src="https://maps.googleapis.com/maps/api/js?key={{GOOGLE_API_KEY}}&libraries=places&callback=initAutoComplete&loading=async"
+      async
       defer
     ></script>
     {% endif %}
-    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-    <script src="{% static 'js/custom.js' %}"></script>
 
     <!-- Include the PayPal JavaScript SDK -->
     <!-- <script src="https://www.paypal.com/sdk/js?client-id={{ PAYPAL_CLIENT_ID }}&currency=USD"></script> -->

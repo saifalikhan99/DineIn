@@ -3,15 +3,16 @@ from urllib import response
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.db import IntegrityError
+from django.core.paginator import Paginator
 
 from menu.forms import CategoryForm, FoodItemForm
 from orders.models import Order, OrderedFood
 import vendor
-from .forms import VendorForm, OpeningHourForm
+from .forms import VendorForm, OpeningHourForm, CouponForm
 from accounts.forms import UserProfileForm
 
 from accounts.models import UserProfile
-from .models import OpeningHour, Vendor
+from .models import OpeningHour, Vendor, Coupon, CouponUsage
 from django.contrib import messages
 
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -270,3 +271,163 @@ def my_orders(request):
         'orders': orders,
     }
     return render(request, 'vendor/my_orders.html', context)
+
+
+# ============== COUPON MANAGEMENT VIEWS ==============
+
+@login_required(login_url='login')
+@user_passes_test(check_role_vendor)
+def coupon_list(request):
+    """Display list of vendor's coupons"""
+    vendor = get_vendor(request)
+    coupons = Coupon.objects.filter(vendor=vendor).order_by('-created_at')
+    
+    # Pagination
+    paginator = Paginator(coupons, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'coupons': page_obj,
+    }
+    return render(request, 'vendor/coupon_list.html', context)
+
+
+@login_required(login_url='login')
+@user_passes_test(check_role_vendor)
+def create_coupon(request):
+    """Create a new coupon"""
+    vendor = get_vendor(request)
+    
+    if request.method == 'POST':
+        form = CouponForm(request.POST)
+        if form.is_valid():
+            coupon = form.save(commit=False)
+            coupon.vendor = vendor
+            try:
+                coupon.save()
+                messages.success(request, 'Coupon created successfully!')
+                return redirect('coupon_list')
+            except IntegrityError:
+                messages.error(request, 'A coupon with this code already exists.')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = CouponForm()
+    
+    context = {
+        'form': form,
+        'action': 'Create'
+    }
+    return render(request, 'vendor/coupon_form.html', context)
+
+
+@login_required(login_url='login')
+@user_passes_test(check_role_vendor)
+def edit_coupon(request, coupon_id):
+    """Edit an existing coupon"""
+    vendor = get_vendor(request)
+    coupon = get_object_or_404(Coupon, id=coupon_id, vendor=vendor)
+    
+    if request.method == 'POST':
+        form = CouponForm(request.POST, instance=coupon)
+        if form.is_valid():
+            try:
+                form.save()
+                messages.success(request, 'Coupon updated successfully!')
+                return redirect('coupon_list')
+            except IntegrityError:
+                messages.error(request, 'A coupon with this code already exists.')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = CouponForm(instance=coupon)
+    
+    context = {
+        'form': form,
+        'coupon': coupon,
+        'action': 'Edit'
+    }
+    return render(request, 'vendor/coupon_form.html', context)
+
+
+@login_required(login_url='login')
+@user_passes_test(check_role_vendor)
+def delete_coupon(request, coupon_id):
+    """Delete a coupon"""
+    vendor = get_vendor(request)
+    coupon = get_object_or_404(Coupon, id=coupon_id, vendor=vendor)
+    
+    if request.method == 'POST':
+        coupon_code = coupon.code
+        coupon.delete()
+        messages.success(request, f'Coupon "{coupon_code}" deleted successfully!')
+        return redirect('coupon_list')
+    
+    context = {
+        'coupon': coupon
+    }
+    return render(request, 'vendor/coupon_confirm_delete.html', context)
+
+
+@login_required(login_url='login')
+@user_passes_test(check_role_vendor)
+def coupon_usage_report(request, coupon_id):
+    """View usage report for a specific coupon"""
+    vendor = get_vendor(request)
+    coupon = get_object_or_404(Coupon, id=coupon_id, vendor=vendor)
+    
+    usage_records = CouponUsage.objects.filter(
+        coupon=coupon,
+        order__is_ordered=True
+    ).select_related('user', 'order').order_by('-used_at')
+    
+    # Pagination
+    paginator = Paginator(usage_records, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Calculate statistics
+    total_uses = usage_records.count()
+    total_discount_given = sum(record.discount_amount for record in usage_records)
+    unique_users = usage_records.values('user').distinct().count()
+    
+    context = {
+        'coupon': coupon,
+        'page_obj': page_obj,
+        'usage_records': page_obj,
+        'total_uses': total_uses,
+        'total_discount_given': total_discount_given,
+        'unique_users': unique_users,
+    }
+    return render(request, 'vendor/coupon_usage_report.html', context)
+
+
+@login_required(login_url='login')
+@user_passes_test(check_role_vendor)
+def toggle_coupon_status(request, coupon_id):
+    """Toggle coupon active/inactive status via AJAX"""
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        vendor = get_vendor(request)
+        try:
+            coupon = Coupon.objects.get(id=coupon_id, vendor=vendor)
+            coupon.is_active = not coupon.is_active
+            coupon.save()
+            
+            status = 'activated' if coupon.is_active else 'deactivated'
+            return JsonResponse({
+                'status': 'success',
+                'message': f'Coupon {status} successfully!',
+                'is_active': coupon.is_active
+            })
+        except Coupon.DoesNotExist:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Coupon not found!'
+            })
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request!'
+    })

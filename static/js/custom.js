@@ -1,16 +1,253 @@
 let autocomplete;
+let navbarAutocomplete;
 
+// Make sure initAutoComplete is globally accessible
 function initAutoComplete() {
+  // Initialize autocomplete for search form (home page)
+  const addressInput = document.getElementById("id_address");
+  if (addressInput) {
+    initSearchFormAutocomplete(addressInput);
+  }
+  
+  // Initialize autocomplete for navbar location
+  const locationInput = document.getElementById("location");
+  if (locationInput) {
+    initNavbarAutocomplete(locationInput);
+  }
+}
+
+// Initialize autocomplete for search form
+function initSearchFormAutocomplete(addressInput) {
+  // Get user's current location first
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        const userLocation = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+        
+        // Create bounds around user's location (roughly 20km radius)
+        const bounds = new google.maps.LatLngBounds(
+          new google.maps.LatLng(userLocation.lat - 0.1, userLocation.lng - 0.1),
+          new google.maps.LatLng(userLocation.lat + 0.1, userLocation.lng + 0.1)
+        );
+        
+        // Initialize autocomplete with location bias
+        autocomplete = new google.maps.places.Autocomplete(
+          addressInput,
+          {
+            types: ["geocode", "establishment"],
+            componentRestrictions: { country: ["in"] },
+            bounds: bounds,
+            strictBounds: false,
+            fields: ["address_components", "geometry", "name"]
+          }
+        );
+        
+        // Ensure proper CSS for dropdown
+        setupAutoCompleteCSS();
+        
+        autocomplete.addListener("place_changed", onPlaceChanged);
+      },
+      function(error) {
+        console.log("Geolocation failed:", error);
+        // Fallback: Initialize without location bias
+        initSearchAutocompleteWithoutLocation(addressInput);
+      }
+    );
+  } else {
+    console.log("Geolocation not supported");
+    initSearchAutocompleteWithoutLocation(addressInput);
+  }
+}
+
+// Initialize autocomplete for navbar location input
+function initNavbarAutocomplete(locationInput) {
+  // Get user's current location first
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        const userLocation = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+        
+        // Create bounds around user's location
+        const bounds = new google.maps.LatLngBounds(
+          new google.maps.LatLng(userLocation.lat - 0.1, userLocation.lng - 0.1),
+          new google.maps.LatLng(userLocation.lat + 0.1, userLocation.lng + 0.1)
+        );
+        
+        // Initialize navbar autocomplete
+        navbarAutocomplete = new google.maps.places.Autocomplete(
+          locationInput,
+          {
+            types: ["geocode", "establishment"],
+            componentRestrictions: { country: ["in"] },
+            bounds: bounds,
+            strictBounds: false,
+            fields: ["address_components", "geometry", "name"]
+          }
+        );
+        
+        // Ensure proper CSS for dropdown
+        setupAutoCompleteCSS();
+        
+        navbarAutocomplete.addListener("place_changed", onNavbarPlaceChanged);
+      },
+      function(error) {
+        console.log("Navbar geolocation failed:", error);
+        // Fallback: Initialize without location bias
+        initNavbarAutocompleteWithoutLocation(locationInput);
+      }
+    );
+  } else {
+    console.log("Geolocation not supported for navbar");
+    initNavbarAutocompleteWithoutLocation(locationInput);
+  }
+}
+
+// Fallback function for search form when geolocation fails
+function initSearchAutocompleteWithoutLocation(addressInput) {
   autocomplete = new google.maps.places.Autocomplete(
-    document.getElementById("id_address"),
+    addressInput,
     {
       types: ["geocode", "establishment"],
-      //default in this app is "IN" - add your country code
       componentRestrictions: { country: ["in"] },
+      fields: ["address_components", "geometry", "name"]
     }
   );
-  // function to specify what should happen when the prediction is clicked
+  
+  setupAutoCompleteCSS();
   autocomplete.addListener("place_changed", onPlaceChanged);
+}
+
+// Fallback function for navbar when geolocation fails
+function initNavbarAutocompleteWithoutLocation(locationInput) {
+  navbarAutocomplete = new google.maps.places.Autocomplete(
+    locationInput,
+    {
+      types: ["geocode", "establishment"],
+      componentRestrictions: { country: ["in"] },
+      fields: ["address_components", "geometry", "name"]
+    }
+  );
+  
+  setupAutoCompleteCSS();
+  navbarAutocomplete.addListener("place_changed", onNavbarPlaceChanged);
+}
+
+// Function to ensure proper CSS for autocomplete dropdown
+function setupAutoCompleteCSS() {
+  // Check if style already exists to avoid duplicates
+  if (document.getElementById('pac-style')) {
+    return;
+  }
+  
+  // Add CSS to ensure dropdown is visible and clickable
+  const style = document.createElement('style');
+  style.id = 'pac-style';
+  style.textContent = `
+    .pac-container {
+      z-index: 10000 !important;
+      position: absolute !important;
+      background-color: white !important;
+      border: 1px solid #ccc !important;
+      border-radius: 4px !important;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3) !important;
+      max-width: 90% !important;
+    }
+    .pac-item {
+      cursor: pointer !important;
+      padding: 8px 12px !important;
+      text-overflow: ellipsis !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      background-color: white !important;
+      border-bottom: 1px solid #e6e6e6 !important;
+      line-height: 1.4 !important;
+    }
+    .pac-item:hover,
+    .pac-item-selected {
+      background-color: #fafafa !important;
+    }
+    .pac-item-query {
+      font-size: 13px !important;
+      color: #333 !important;
+    }
+    .pac-matched {
+      font-weight: bold !important;
+      color: #000 !important;
+    }
+    .pac-item:last-child {
+      border-bottom: none !important;
+    }
+    /* Ensure input field styling doesn't interfere */
+    #location {
+      position: relative !important;
+      z-index: 1 !important;
+    }
+    #id_address {
+      position: relative !important;
+      z-index: 1 !important;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+// Handler for navbar location selection
+function onNavbarPlaceChanged() {
+  var place = navbarAutocomplete.getPlace();
+
+  if (!place.geometry) {
+    document.getElementById("location").placeholder = "Start typing...";
+    return;
+  }
+
+  console.log("Navbar place selected:", place.name);
+  
+  // Update navbar location display
+  var selectedLocation = place.name || place.formatted_address;
+  document.getElementById("location").value = selectedLocation;
+  
+  // Extract location components and store them
+  var locationComponents = {
+    lat: place.geometry.location.lat(),
+    lng: place.geometry.location.lng(),
+    sublocality: '',
+    locality: '',
+    district: '',
+    state: '',
+    country: ''
+  };
+  
+  // Parse address components
+  for (var i = 0; i < place.address_components.length; i++) {
+    var component = place.address_components[i];
+    var types = component.types;
+    
+    if (types.includes('sublocality_level_1') || types.includes('sublocality')) {
+      locationComponents.sublocality = component.long_name;
+    } else if (types.includes('locality')) {
+      locationComponents.locality = component.long_name;
+    } else if (types.includes('administrative_area_level_3')) {
+      locationComponents.district = component.long_name;
+    } else if (types.includes('administrative_area_level_1')) {
+      locationComponents.state = component.long_name;
+    } else if (types.includes('country')) {
+      locationComponents.country = component.long_name;
+    }
+  }
+  
+  // Store in session storage
+  sessionStorage.setItem('current_lat', locationComponents.lat);
+  sessionStorage.setItem('current_lng', locationComponents.lng);
+  sessionStorage.setItem('current_sublocality', locationComponents.sublocality);
+  sessionStorage.setItem('current_city', locationComponents.locality);
+  sessionStorage.setItem('current_state', locationComponents.state);
+  
+  console.log("Navbar location components stored:", locationComponents);
 }
 
 function onPlaceChanged() {
@@ -299,6 +536,8 @@ $(document).ready(function () {
       },
     });
   });
-
   // document ready close
 });
+
+// Ensure initAutoComplete is globally accessible for Google Maps callback
+window.initAutoComplete = initAutoComplete;

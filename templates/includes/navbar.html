@@ -53,42 +53,147 @@
             </div>
         </div>
     </header>
-    <!-- Header End -->
-
-    <script>
+    <!-- Header End -->    <script>
     var x = document.getElementById("location");
-    var current_location = sessionStorage.getItem("current_location")
-    if(current_location != ""){
+    var current_location = sessionStorage.getItem("current_location");
+    if(current_location && current_location !== "null" && current_location !== ""){
         x.value = current_location;
     }
-    
-    function getLocation() {
+      function getLocation() {
         if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(showPosition);
+            // Use high accuracy for better GPS precision
+            var options = {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 300000 // 5 minutes cache
+            };
+            navigator.geolocation.getCurrentPosition(showPosition, showError, options);
         } else { 
-        x.innerHTML = "Geolocation is not supported by this browser.";
+            x.innerHTML = "Geolocation is not supported by this browser.";
         }
     }
     
-    function showPosition(position) {
+    function showError(error) {
+        console.error("Geolocation error:", error);
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                x.value = "Location access denied by user.";
+                break;
+            case error.POSITION_UNAVAILABLE:
+                x.value = "Location information is unavailable.";
+                break;
+            case error.TIMEOUT:
+                x.value = "Location request timed out.";
+                break;
+            default:
+                x.value = "An unknown error occurred.";
+                break;
+        }
+    }      function showPosition(position) {
         var lat = position.coords.latitude
         var lng = position.coords.longitude
-
-        // var lat = '19.0713949'
-        // var lng = '72.9984126'
-
-        // hit AJAX request to googlemaps api endpoint and get the location data using those lat and lng
+        
+        console.log("GPS Coordinates:", lat, lng);
+          // Use Google Maps Geocoding API - remove restrictive filters to get all components
         var GOOGLE_API_KEY = "{{ GOOGLE_API_KEY }}"
-        var url = "https://maps.googleapis.com/maps/api/geocode/json?latlng="+lat+","+lng+"+&key="+GOOGLE_API_KEY
+        var url = "https://maps.googleapis.com/maps/api/geocode/json?latlng="+lat+","+lng+"&key="+GOOGLE_API_KEY
         
         $.ajax({
             url: url,
             type: "GET",
-            success: function(response){
-                var current_location = response.results[0].formatted_address
+            success: function(response){                console.log("Geocoding response:", response);
+                
+                var current_location = "";
+                var city_name = "";
+                var district_name = "";
+                var state_name = "";
+                var locality_name = "";
+                var sublocality_name = "";
+                
+                // Extract all location components
+                if (response.results && response.results.length > 0) {
+                    
+                    // Look through all results to find location components
+                    for (var i = 0; i < response.results.length; i++) {
+                        var result = response.results[i];
+                        
+                        if (result.address_components) {
+                            for (var j = 0; j < result.address_components.length; j++) {
+                                var component = result.address_components[j];
+                                var types = component.types;
+                                var name = component.long_name;
+                                
+                                // Extract different location levels
+                                if (types.includes('sublocality_level_1') && !sublocality_name) {
+                                    sublocality_name = name;
+                                }
+                                if (types.includes('locality') && !locality_name) {
+                                    locality_name = name;
+                                }
+                                if (types.includes('administrative_area_level_2') && !district_name) {
+                                    district_name = name;
+                                }
+                                if (types.includes('administrative_area_level_1') && !state_name) {
+                                    state_name = name;
+                                }
+                            }
+                        }
+                    }
+                    
+                    console.log("Location Details:");
+                    console.log("Sublocality:", sublocality_name);
+                    console.log("Locality/City:", locality_name);
+                    console.log("District:", district_name);
+                    console.log("State:", state_name);
+                    
+                    // Build comprehensive location string
+                    var location_parts = [];
+                    
+                    // Add current location (most specific)
+                    if (sublocality_name) {
+                        location_parts.push(sublocality_name);
+                    }
+                    
+                    // Add city/locality
+                    if (locality_name && locality_name !== sublocality_name) {
+                        location_parts.push(locality_name);
+                    } else if (district_name && !locality_name) {
+                        // Use district if no locality found
+                        var clean_district = district_name.replace(/\s+District$/i, '');
+                        location_parts.push(clean_district);
+                    }
+                    
+                    // Add state
+                    if (state_name) {
+                        location_parts.push(state_name);
+                    }
+                    
+                    // Create the display string
+                    current_location = location_parts.join(", ");
+                    
+                    // Fallback to formatted address if no components found
+                    if (!current_location) {
+                        current_location = response.results[0].formatted_address;
+                    }
+                    
+                } else {
+                    current_location = "Location not found";
+                }                  console.log("Final location display:", current_location);
                 x.value = current_location
                 sessionStorage.setItem("current_location", current_location)
-                window.location = '?lat='+lat+'&lng='+lng
+                
+                // Also save individual components for potential use
+                sessionStorage.setItem("current_sublocality", sublocality_name || "");
+                sessionStorage.setItem("current_city", locality_name || district_name?.replace(/\s+District$/i, '') || "");
+                sessionStorage.setItem("current_state", state_name || "");
+                
+                // Store coordinates for potential future use without redirecting
+                sessionStorage.setItem("current_lat", lat);
+                sessionStorage.setItem("current_lng", lng);
+            },
+            error: function(xhr, status, error) {
+                console.error("Geocoding error:", error);
+                x.value = "Unable to detect location";
             }
         })
     }

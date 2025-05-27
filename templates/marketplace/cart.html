@@ -98,9 +98,46 @@
                                                             <span id="tax-{{ key }}">{{ j }}</span>
                                                         </span>
                                                     </li>
-                                                {% endfor %}
-                                            {% endfor %}
+                                                {% endfor %}                                            {% endfor %}
 
+                                            <!-- Coupon Section -->
+                                            {% if cart_items %}
+                                            <li style="list-style-type: none; border-top: 1px solid #eee; padding-top: 10px; margin-top: 10px;">
+                                                <div class="coupon-section">
+                                                    {% if not applied_coupon %}
+                                                    <div class="coupon-form">
+                                                        <h6>Have a coupon?</h6>
+                                                        <div class="input-group">
+                                                            <input type="text" id="coupon-code" class="form-control" placeholder="Enter coupon code" style="border-radius: 4px 0 0 4px;">
+                                                            <div class="input-group-append">
+                                                                <button type="button" id="apply-coupon" class="btn btn-primary" style="border-radius: 0 4px 4px 0;">Apply</button>
+                                                            </div>
+                                                        </div>
+                                                        <div id="coupon-message" class="mt-2"></div>
+                                                    </div>
+                                                    {% else %}
+                                                    <div class="coupon-applied">
+                                                        <h6>Coupon Applied</h6>
+                                                        <div class="alert alert-success d-flex justify-content-between align-items-center" style="margin-bottom: 0;">
+                                                            <span><strong>{{ applied_coupon.code }}</strong> - {{ applied_coupon.description }}</span>
+                                                            <button type="button" id="remove-coupon" class="btn btn-sm btn-outline-danger">Remove</button>
+                                                        </div>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </li>
+                                            {% endif %}
+
+                                            <!-- Discount Display -->
+                                            {% if coupon_discount_amount %}
+                                            <li style="list-style-type: none; color: green;">
+                                                Discount ({{ applied_coupon.code }})
+                                                <span class="price float-right" style="color: green;">
+                                                    <span class="currency">-$</span>
+                                                    <span id="discount">{{ coupon_discount_amount }}</span>
+                                                </span>
+                                            </li>
+                                            {% endif %}
 
                                             <li style="list-style-type: none; font-weight: 600;">
                                                 TOTAL
@@ -126,5 +163,77 @@
     </div>
 </div>
 <!-- Main Section End -->
+
+<script>
+$(document).ready(function() {
+    // Apply Coupon
+    $('#apply-coupon').click(function() {
+        var couponCode = $('#coupon-code').val().trim();
+        if (!couponCode) {
+            $('#coupon-message').html('<div class="alert alert-danger">Please enter a coupon code</div>');
+            return;
+        }
+        
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'apply_coupon' %}",
+            data: {
+                'coupon_code': couponCode,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            beforeSend: function() {
+                $('#apply-coupon').prop('disabled', true).text('Applying...');
+                $('#coupon-message').html('');
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    // Reload the page to show updated cart
+                    location.reload();
+                } else {
+                    $('#coupon-message').html('<div class="alert alert-danger">' + response.message + '</div>');
+                }
+            },
+            error: function() {
+                $('#coupon-message').html('<div class="alert alert-danger">An error occurred. Please try again.</div>');
+            },
+            complete: function() {
+                $('#apply-coupon').prop('disabled', false).text('Apply');
+            }
+        });
+    });
+    
+    // Remove Coupon
+    $('#remove-coupon').click(function() {
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'remove_coupon' %}",
+            data: {
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            beforeSend: function() {
+                $(this).prop('disabled', true).text('Removing...');
+            },
+            success: function(response) {
+                if (response.status === 'success') {
+                    // Reload the page to show updated cart
+                    location.reload();
+                } else {
+                    alert('Error removing coupon: ' + response.message);
+                }
+            },
+            error: function() {
+                alert('An error occurred. Please try again.');
+            }
+        });
+    });
+    
+    // Allow Enter key to apply coupon
+    $('#coupon-code').keypress(function(e) {
+        if (e.which == 13) {
+            $('#apply-coupon').click();
+        }
+    });
+});
+</script>
 
 {% endblock %}

@@ -22,6 +22,9 @@ def get_cart_amounts(request):
     tax = 0
     grand_total = 0
     tax_dict = {}
+    discount = 0
+    coupon_info = {}
+    
     if request.user.is_authenticated:
         cart_items = Cart.objects.filter(user=request.user)
         for item in cart_items:
@@ -36,5 +39,23 @@ def get_cart_amounts(request):
             tax_dict.update({tax_type: {str(tax_percentage) : tax_amount}})
         
         tax = sum(x for key in tax_dict.values() for x in key.values())
-        grand_total = subtotal + tax
-    return dict(subtotal=subtotal, tax=tax, grand_total=grand_total, tax_dict=tax_dict)
+        
+        # Check for applied coupon in session
+        if hasattr(request, 'session') and 'applied_coupon' in request.session:
+            coupon_data = request.session['applied_coupon']
+            discount = float(coupon_data.get('discount_amount', 0))
+            coupon_info = {
+                'code': coupon_data.get('code', ''),
+                'discount_amount': discount
+            }
+        
+        grand_total = subtotal + tax - discount
+        
+    return dict(
+        subtotal=subtotal, 
+        tax=tax, 
+        grand_total=grand_total, 
+        tax_dict=tax_dict,
+        coupon_discount=discount,
+        coupon_info=coupon_info
+    )

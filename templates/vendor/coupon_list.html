@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+{% include 'includes/alerts.html' %}
+
+<!-- Main Section Start -->
+<div class="main-section">
+    {% include 'includes/cover.html' %}
+    <div class="page-section account-header buyer-logged-in">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+                    <!-- Load the sidebar here -->
+                    {% include 'includes/v_sidebar.html' %}
+                </div>
+                <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
+                    <div class="user-dashboard loader-holder">
+                        <div class="user-holder">
+                            <h5 class="text-uppercase">Manage Coupons</h5>
+                            
+                            <!-- Add Coupon Button -->
+                            <div class="row mb-3">
+                                <div class="col-lg-12">
+                                    <a href="{% url 'create_coupon' %}" class="btn btn-success pull-right">
+                                        <i class="fa fa-plus"></i> Add New Coupon
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Coupons Table -->
+                            {% if coupons %}
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Code</th>
+                                            <th>Type</th>
+                                            <th>Value</th>
+                                            <th>Min Order</th>
+                                            <th>Valid From</th>
+                                            <th>Valid To</th>
+                                            <th>Usage Count</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for coupon in coupons %}
+                                        <tr>                                            <td>
+                                                <strong>{{ coupon.code }}</strong>
+                                                {% if coupon.name %}
+                                                <br><small class="text-muted">{{ coupon.name|truncatechars:50 }}</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if coupon.discount_type == 'PERCENTAGE' %}
+                                                    <span class="label label-info">Percentage</span>
+                                                {% else %}
+                                                    <span class="label label-warning">Fixed Amount</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if coupon.discount_type == 'PERCENTAGE' %}
+                                                    {{ coupon.discount_value }}%
+                                                    {% if coupon.maximum_discount_amount %}
+                                                        <br><small>(Max: ${{ coupon.maximum_discount_amount }})</small>
+                                                    {% endif %}
+                                                {% else %}
+                                                    ${{ coupon.discount_value }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if coupon.minimum_order_amount %}
+                                                    ${{ coupon.minimum_order_amount }}
+                                                {% else %}
+                                                    No minimum
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ coupon.valid_from|date:"M d, Y" }}</td>
+                                            <td>{{ coupon.valid_until|date:"M d, Y" }}</td>
+                                            <td>
+                                                {{ coupon.current_usage_count }} / 
+                                                {% if coupon.usage_limit %}
+                                                    {{ coupon.usage_limit }}
+                                                {% else %}
+                                                    Unlimited
+                                                {% endif %}
+                                                <br>
+                                                <a href="{% url 'coupon_usage_report' coupon.pk %}" class="btn btn-sm btn-link">
+                                                    View Report
+                                                </a>
+                                            </td>
+                                            <td>
+                                                {% if coupon.is_active %}
+                                                    <span class="label label-success">Active</span>
+                                                {% else %}
+                                                    <span class="label label-danger">Inactive</span>
+                                                {% endif %}
+                                                <br>
+                                                {% if coupon.is_valid %}
+                                                    <span class="label label-success">Valid</span>
+                                                {% else %}
+                                                    <span class="label label-warning">Expired/Full</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{% url 'edit_coupon' coupon.pk %}" class="btn btn-sm btn-info" title="Edit">
+                                                        <i class="fa fa-edit"></i>
+                                                    </a>
+                                                    <a href="{% url 'toggle_coupon_status' coupon.pk %}" class="btn btn-sm {% if coupon.is_active %}btn-warning{% else %}btn-success{% endif %}" title="{% if coupon.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                                        {% if coupon.is_active %}
+                                                            <i class="fa fa-pause"></i>
+                                                        {% else %}
+                                                            <i class="fa fa-play"></i>
+                                                        {% endif %}
+                                                    </a>
+                                                    <a href="{% url 'delete_coupon' coupon.pk %}" class="btn btn-sm btn-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this coupon?')">
+                                                        <i class="fa fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center" style="padding: 50px;">
+                                <h4>No Coupons Found</h4>
+                                <p>You haven't created any coupons yet.</p>
+                                <a href="{% url 'create_coupon' %}" class="btn btn-primary">
+                                    <i class="fa fa-plus"></i> Create Your First Coupon
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Main Section End -->
+{% endblock %}

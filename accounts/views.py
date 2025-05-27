@@ -57,6 +57,7 @@ def registerUser(request):
             password = form.cleaned_data['password']
             user = User.objects.create_user(first_name=first_name, last_name=last_name, username=username, email=email, password=password)
             user.role = User.CUSTOMER
+            user.is_active = True  # Activate user immediately for testing
             user.save()
 
             # Send verification email
@@ -92,6 +93,7 @@ def registerVendor(request):
             password = form.cleaned_data['password']
             user = User.objects.create_user(first_name=first_name, last_name=last_name, username=username, email=email, password=password)
             user.role = User.VENDOR
+            user.is_active = True  # Activate user immediately for testing
             user.save()
             vendor = v_form.save(commit=False)
             vendor.user = user

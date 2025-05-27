@@ -48,6 +48,9 @@ class Order(models.Model):
     tax_data = models.JSONField(blank=True, help_text = "Data format: {'tax_type':{'tax_percentage':'tax_amount'}}", null=True)
     total_data = models.JSONField(blank=True, null=True)
     total_tax = models.FloatField()
+    # Coupon related fields
+    coupon_code = models.CharField(max_length=20, blank=True, null=True)
+    coupon_discount = models.FloatField(default=0.0, help_text="Discount amount applied from coupon")
     payment_method = models.CharField(max_length=25)
     status = models.CharField(max_length=15, choices=STATUS, default='New')
     is_ordered = models.BooleanField(default=False)

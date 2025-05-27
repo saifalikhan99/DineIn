@@ -17,9 +17,7 @@ urlpatterns = [
     # FoodItem CRUD
     path('menu-builder/food/add/', views.add_food, name='add_food'),
     path('menu-builder/food/edit/<int:pk>/', views.edit_food, name='edit_food'),
-    path('menu-builder/food/delete/<int:pk>/', views.delete_food, name='delete_food'),
-
-    # Opening Hour CRUD
+    path('menu-builder/food/delete/<int:pk>/', views.delete_food, name='delete_food'),    # Opening Hour CRUD
     path('opening-hours/', views.opening_hours, name='opening_hours'),
     path('opening-hours/add/', views.add_opening_hours, name='add_opening_hours'),
     path('opening-hours/remove/<int:pk>/', views.remove_opening_hours, name='remove_opening_hours'),
@@ -27,5 +25,12 @@ urlpatterns = [
     path('order_detail/<int:order_number>/', views.order_detail, name='vendor_order_detail'),
     path('my_orders/', views.my_orders, name='vendor_my_orders'),
 
+    # Coupon Management URLs
+    path('coupons/', views.coupon_list, name='coupon_list'),
+    path('coupons/create/', views.create_coupon, name='create_coupon'),
+    path('coupons/edit/<int:coupon_id>/', views.edit_coupon, name='edit_coupon'),
+    path('coupons/delete/<int:coupon_id>/', views.delete_coupon, name='delete_coupon'),
+    path('coupons/toggle/<int:coupon_id>/', views.toggle_coupon_status, name='toggle_coupon_status'),
+    path('coupons/usage-report/<int:coupon_id>/', views.coupon_usage_report, name='coupon_usage_report'),
 
 ]
