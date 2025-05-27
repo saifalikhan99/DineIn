@@ -11,7 +11,7 @@ from .utils import generate_order_number, order_total_by_vendor
 from accounts.utils import send_notification
 from django.contrib.auth.decorators import login_required
 import razorpay
-from DineIn_main.settings import RZP_KEY_ID, RZP_KEY_SECRET
+from foodOnline_main.settings import RZP_KEY_ID, RZP_KEY_SECRET
 from django.contrib.sites.shortcuts import get_current_site
 
 

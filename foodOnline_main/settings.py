@@ -91,16 +91,21 @@ WSGI_APPLICATION = 'foodOnline_main.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+
 DATABASES = {
     "default": {
-        # "ENGINE": "django.db.backends.postgresql",
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-         'NAME': config('DB_NAME'),
+        'NAME': config('DB_NAME'),
         'USER': config('DB_USER'),
         'PASSWORD': config('DB_PASSWORD'),
         'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT', default='5433'),
     }
 }
+print(f"DB_NAME: {config('DB_NAME')}")
+print(f"DB_PORT: {config('DB_PORT')}")
+print(f"DB_HOST: {config('DB_HOST')}")
+
 
 AUTH_USER_MODEL = 'accounts.User'
 
@@ -168,7 +173,7 @@ EMAIL_PORT = config('EMAIL_PORT', cast=int)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = 'mca.amu2022@gmail.com'
+DEFAULT_FROM_EMAIL = 'saifalikhan.cs.amu@gmail.com'
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 RZP_KEY_ID = config('RZP_KEY_ID')
 RZP_KEY_SECRET = config('RZP_KEY_SECRET')
@@ -176,10 +181,12 @@ RZP_KEY_SECRET = config('RZP_KEY_SECRET')
 GOOGLE_API_KEY = config('GOOGLE_API_KEY')
 
 if DEBUG == True:
-    os.environ['PATH'] = os.path.join(BASE_DIR, 'venv\Lib\site-packages\osgeo') + ';' + os.environ['PATH']
-    os.environ['PROJ_LIB'] = os.path.join(BASE_DIR, 'venv\Lib\site-packages\osgeo\data\proj') + ';' + os.environ['PATH']
-    GDAL_LIBRARY_PATH = os.path.join(BASE_DIR, 'venv\Lib\site-packages\osgeo\gdal.dll')
-
+    # OSGeo4W installation paths
+    os.environ['PATH'] = r'C:\OSGeo4W\bin' + ';' + os.environ['PATH']
+    os.environ['PROJ_LIB'] = r'C:\OSGeo4W\share\proj'
+    GDAL_LIBRARY_PATH = r'C:\OSGeo4W\bin\gdal310.dll'
+    GEOS_LIBRARY_PATH = r'C:\OSGeo4W\bin\geos_c.dll'
+    
 # PAYPAL_CLIENT_ID = config('PAYPAL_CLIENT_ID')
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'
