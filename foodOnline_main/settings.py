@@ -175,8 +175,10 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'saifalikhan.cs.amu@gmail.com'
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-RZP_KEY_ID = config('RZP_KEY_ID')
-RZP_KEY_SECRET = config('RZP_KEY_SECRET')
+
+# Stripe configuration
+STRIPE_PUBLISHABLE_KEY = config('STRIPE_PUBLISHABLE_KEY')
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')
 
 GOOGLE_API_KEY = config('GOOGLE_API_KEY')
 

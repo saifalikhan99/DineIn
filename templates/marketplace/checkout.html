@@ -154,19 +154,13 @@
                                                     <span class="currency">$</span>
                                                     <span id="total">{{ grand_total }}</span>
                                                 </span>
-                                            </li>
-
-                                            <!-- Select payment method -->
+                                            </li>                                            <!-- Select payment method -->
                                             <h5>SELECT PAYMENT METHOD</h5>
                                             <div class="payment-method">
                                                 <label>
-                                                    <input type="radio" name="payment_method" value="PayPal">
-                                                    <img src="{% static 'images/PayPal.png' %}" alt="PayPal" width="100">
-                                                </label>
-                                                &emsp;
-                                                <label>
-                                                    <input type="radio" name="payment_method" value="RazorPay">
-                                                    <img src="{% static 'images/razorpay_logo.png' %}" alt="RazorPay" width="100">
+                                                    <input type="radio" name="payment_method" value="Stripe" checked>
+                                                    <img src="{% static 'images/stripe_logo' %}" alt="Stripe" width="100">
+                                                    <span class="ml-2">Pay securely with Stripe</span>
                                                 </label>
                                             </div>
                                             <span class="text-danger" id="payment-method-error"></span>
