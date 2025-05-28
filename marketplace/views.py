@@ -1,5 +1,6 @@
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+import json
 
 from accounts.models import UserProfile
 from .context_processors import get_cart_counter, get_cart_amounts
@@ -11,6 +12,7 @@ from django.db.models import Prefetch
 from .models import Cart
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from django.views.decorators.csrf import csrf_exempt
 
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.measure import D # ``D`` is a shortcut for ``Distance``
@@ -201,88 +203,118 @@ def checkout(request):
 
 # ============== COUPON APPLICATION VIEWS ==============
 
+# ...existing code...
+
+@csrf_exempt
 @login_required(login_url='login')
 def apply_coupon(request):
-    """Apply coupon code during checkout"""
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest' and request.method == 'POST':
-        coupon_code = request.POST.get('coupon_code', '').upper().strip()
-        
-        if not coupon_code:
-            return JsonResponse({
-                'status': 'error',
-                'message': 'Please enter a coupon code.'
-            })
-        
-        # Get user's cart items
-        cart_items = Cart.objects.filter(user=request.user)
-        if not cart_items.exists():
-            return JsonResponse({
-                'status': 'error',
-                'message': 'Your cart is empty.'
-            })
-        
-        # Get vendors from cart items
-        vendor_ids = list(cart_items.values_list('fooditem__vendor', flat=True).distinct())
-        
+    if request.method == 'POST':
         try:
-            # Find the coupon
-            coupon = Coupon.objects.get(
-                code=coupon_code,
-                vendor__in=vendor_ids,
-                is_active=True
-            )
+            # Debug: Print raw request data
+            print(f"DEBUG: request.body = {request.body}")
+            print(f"DEBUG: request.content_type = {request.content_type}")
+            print(f"DEBUG: request.POST = {request.POST}")
             
-            # Check if coupon is valid
+            # Try to parse JSON data
+            if request.content_type == 'application/json':
+                data = json.loads(request.body)
+            else:
+                # Handle form data
+                data = {
+                    'coupon_code': request.POST.get('coupon_code', ''),
+                }
+            
+            coupon_code = data.get('coupon_code', '').strip().upper()
+            print(f"DEBUG: coupon_code = '{coupon_code}'")
+            
+            if not coupon_code:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Please enter a coupon code.'
+                })
+            
+            # Get user's cart items
+            cart_items = Cart.objects.filter(user=request.user)
+            if not cart_items.exists():
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Your cart is empty.'
+                })
+            
+            # Get vendor from cart items
+            vendor = cart_items.first().fooditem.vendor
+            
+            # Find the coupon
+            try:
+                coupon = Coupon.objects.get(
+                    code__iexact=coupon_code,
+                    vendor=vendor,
+                    is_active=True
+                )
+            except Coupon.DoesNotExist:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'This coupon is not valid or has expired.'
+                })
+            
+            # Check if coupon is valid using the model's is_valid method
             if not coupon.is_valid():
                 return JsonResponse({
                     'status': 'error',
                     'message': 'This coupon is not valid or has expired.'
                 })
             
-            # Check if user can use this coupon
-            if not coupon.can_be_used_by_user(request.user):
-                return JsonResponse({
-                    'status': 'error',
-                    'message': 'You have already used this coupon the maximum number of times.'
-                })
+            # Calculate cart total
+            cart_total = sum(item.fooditem.price * item.quantity for item in cart_items)
             
-            # Calculate current cart amounts
-            cart_amounts = get_cart_amounts(request)
-            subtotal = float(cart_amounts['subtotal'])
-            
-            # Check minimum order amount
-            if subtotal < float(coupon.minimum_order_amount):
+            # Check minimum amount requirement
+            if cart_total < coupon.minimum_order_amount:
                 return JsonResponse({
                     'status': 'error',
                     'message': f'Minimum order amount of ₹{coupon.minimum_order_amount} required for this coupon.'
                 })
             
-            # Calculate discount
-            discount_amount = coupon.get_discount_amount(subtotal)
-            new_total = subtotal + float(cart_amounts['tax']) - discount_amount
+            # Calculate discount based on coupon type
+            if coupon.discount_type == 'percentage':
+                discount_amount = cart_total * (coupon.discount_value / 100)
+                # Apply maximum discount limit if set
+                if coupon.maximum_discount_amount:
+                    discount_amount = min(discount_amount, coupon.maximum_discount_amount)
+            else:  # fixed amount
+                discount_amount = coupon.discount_value
             
-            # Store coupon info in session
+            # Ensure discount doesn't exceed cart total
+            discount_amount = min(discount_amount, cart_total)
+            final_total = cart_total - discount_amount
+            
+            # Store coupon in session
             request.session['applied_coupon'] = {
+                'id': coupon.id,
                 'code': coupon.code,
-                'discount_amount': discount_amount,
-                'coupon_id': coupon.id
+                'discount_amount': float(discount_amount),
+                'vendor_id': vendor.id
             }
             
             return JsonResponse({
                 'status': 'success',
-                'message': f'Coupon applied! You saved ₹{discount_amount}',
-                'discount_amount': discount_amount,
-                'new_total': new_total,
-                'coupon_code': coupon.code,
-                'coupon_name': coupon.name
+                'message': 'Coupon applied successfully!',
+                'discount_amount': float(discount_amount),
+                'cart_total': float(cart_total),
+                'final_total': float(final_total),
+                'coupon_code': coupon.code
             })
             
-        except Coupon.DoesNotExist:
+        except json.JSONDecodeError as e:
+            print(f"DEBUG: JSON decode error: {str(e)}")
+            print(f"DEBUG: request.body = {request.body}")
             return JsonResponse({
                 'status': 'error',
-                'message': 'Invalid coupon code or coupon not applicable to items in your cart.'
+                'message': 'Invalid data format.'
             })
         except Exception as e:
+            print(f"Error applying coupon: {str(e)}")
+            import traceback
+            traceback.print_exc()
             return JsonResponse({
                 'status': 'error',
                 'message': 'Something went wrong. Please try again.'
@@ -290,31 +322,33 @@ def apply_coupon(request):
     
     return JsonResponse({
         'status': 'error',
-        'message': 'Invalid request!'
+        'message': 'Invalid request method.'
     })
 
+# ...existing code...
 
+@csrf_exempt
 @login_required(login_url='login')
 def remove_coupon(request):
-    """Remove applied coupon"""
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest' and request.method == 'POST':
+    if request.method == 'POST':
         try:
             # Remove coupon from session
             if 'applied_coupon' in request.session:
                 del request.session['applied_coupon']
             
-            # Recalculate cart amounts without coupon
-            cart_amounts = get_cart_amounts(request)
+            # Recalculate cart total
+            cart_items = Cart.objects.filter(user=request.user)
+            cart_total = sum(item.fooditem.price * item.quantity for item in cart_items)
             
             return JsonResponse({
                 'status': 'success',
                 'message': 'Coupon removed successfully!',
-                'new_total': float(cart_amounts['grand_total']),
-                'subtotal': float(cart_amounts['subtotal']),
-                'tax': float(cart_amounts['tax'])
+                'cart_total': float(cart_total),
+                'final_total': float(cart_total)
             })
             
         except Exception as e:
+            print(f"Error removing coupon: {str(e)}")
             return JsonResponse({
                 'status': 'error',
                 'message': 'Something went wrong. Please try again.'
@@ -322,5 +356,5 @@ def remove_coupon(request):
     
     return JsonResponse({
         'status': 'error',
-        'message': 'Invalid request!'
+        'message': 'Invalid request method.'
     })

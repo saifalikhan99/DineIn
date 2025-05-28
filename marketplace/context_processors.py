@@ -17,45 +17,42 @@ def get_cart_counter(request):
     return dict(cart_count=cart_count)
 
 
+# ...existing code...
+
+from decimal import Decimal
+
 def get_cart_amounts(request):
     subtotal = 0
     tax = 0
     grand_total = 0
     tax_dict = {}
-    discount = 0
-    coupon_info = {}
+    discount = Decimal('0.00')  # Initialize as Decimal
     
     if request.user.is_authenticated:
         cart_items = Cart.objects.filter(user=request.user)
         for item in cart_items:
             fooditem = FoodItem.objects.get(pk=item.fooditem.id)
-            subtotal += (fooditem.price * item.quantity) # subtotal = subtotal + (fooditem.price * item.quantity)
+            subtotal += (fooditem.price * item.quantity)
 
+        # Get applied coupon from session
+        if 'applied_coupon' in request.session:
+            discount = Decimal(str(request.session['applied_coupon']['discount_amount']))
+        
+        # Calculate tax
         get_tax = Tax.objects.filter(is_active=True)
         for i in get_tax:
             tax_type = i.tax_type
             tax_percentage = i.tax_percentage
             tax_amount = round((tax_percentage * subtotal)/100, 2)
-            tax_dict.update({tax_type: {str(tax_percentage) : tax_amount}})
+            tax_dict.update({tax_type: {str(tax_percentage): str(tax_amount)}})
         
-        tax = sum(x for key in tax_dict.values() for x in key.values())
-        
-        # Check for applied coupon in session
-        if hasattr(request, 'session') and 'applied_coupon' in request.session:
-            coupon_data = request.session['applied_coupon']
-            discount = float(coupon_data.get('discount_amount', 0))
-            coupon_info = {
-                'code': coupon_data.get('code', ''),
-                'discount_amount': discount
-            }
-        
+        tax = sum(x for key in tax_dict.values() for x in map(Decimal, key.values()))
         grand_total = subtotal + tax - discount
-        
+    
     return dict(
         subtotal=subtotal, 
         tax=tax, 
         grand_total=grand_total, 
         tax_dict=tax_dict,
-        coupon_discount=discount,
-        coupon_info=coupon_info
+        discount=discount  # Add discount to the context
     )
