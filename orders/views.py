@@ -103,7 +103,7 @@ def place_order(request):
                 
                 intent = stripe.PaymentIntent.create(
                     amount=int(float(order.total) * 100),  # amount in cents
-                    currency='usd',
+                    currency='inr',
                     description=description,  # Required for Indian regulations
                     metadata={
                         'order_number': order.order_number,
@@ -156,8 +156,8 @@ def create_payment_intent(request):
             
             # Create Stripe PaymentIntent with description
             intent = stripe.PaymentIntent.create(
-                amount=int(float(order.total) * 100),  # Amount in cents
-                currency='usd',
+                amount=int(float(order.total) * 100),  # Amount in paisa (INR cents)
+                currency='inr',  # Changed from 'usd' to 'inr'
                 description=description,  # Required for Indian regulations
                 automatic_payment_methods={
                     'enabled': True,
