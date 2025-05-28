@@ -79,7 +79,7 @@
                                                     <td><img src="{{ item.fooditem.image.url }}" width="40" alt="Food Image" class="rounded"></td>
                                                     <td><b>{{ item.fooditem }}</b></td>
                                                     <td class="text-center">{{ item.quantity }}</td>
-                                                    <td class="text-right">${{ item.fooditem.price|floatformat:2 }}</td>
+                                                    <td class="text-right">₹{{ item.fooditem.price|floatformat:2 }}</td>
                                                 </tr>
                                                 {% endfor %}
                                             </tbody>
@@ -89,14 +89,14 @@
                                         <ul class="list-unstyled">
                                             <li class="d-flex justify-content-between">
                                                 <span>Subtotal</span>
-                                                <span><strong>${{ subtotal|floatformat:2 }}</strong></span>
+                                                <span><strong>₹{{ subtotal|floatformat:2 }}</strong></span>
                                             </li>
 
                                             {% for key, value in tax_dict.items %}
                                                 {% for i, j in value.items %}
                                                     <li class="d-flex justify-content-between">
                                                         <span>{{ key }} <small>({{ i }}%)</small></span>
-                                                        <span>${{ j }}</span>
+                                                        <span>₹{{ j }}</span>
                                                     </li>
                                                 {% endfor %}
                                             {% endfor %}
@@ -104,7 +104,7 @@
                                             <hr>
                                             <li class="d-flex justify-content-between">
                                                 <span><strong>TOTAL</strong></span>
-                                                <span><strong class="text-danger">${{ grand_total|floatformat:2 }}</strong></span>
+                                                <span><strong class="text-danger">₹{{ grand_total|floatformat:2 }}</strong></span>
                                             </li>
                                         </ul>
 
@@ -122,7 +122,7 @@
                                                     
                                                     <button id="submit-payment" class="btn btn-danger btn-lg w-100 mt-3">
                                                         <span id="button-text">
-                                                            <i class="fa fa-lock"></i> Pay ${{ grand_total|floatformat:2 }}
+                                                            <i class="fa fa-lock"></i> Pay ₹{{ grand_total|floatformat:2 }}
                                                         </span>
                                                         <div id="spinner" class="spinner-border spinner-border-sm d-none ml-2" role="status">
                                                             <span class="sr-only">Loading...</span>
@@ -445,7 +445,7 @@ document.addEventListener('DOMContentLoaded', function() {
             buttonText.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Processing...';
         } else {
             button.disabled = false;
-            buttonText.innerHTML = '<i class="fa fa-lock"></i> Pay ${{ grand_total|floatformat:2 }}';
+            buttonText.innerHTML = '<i class="fa fa-lock"></i> Pay ₹{{ grand_total|floatformat:2 }}';
         }
     }
 });

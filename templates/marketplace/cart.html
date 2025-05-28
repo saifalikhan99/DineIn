@@ -35,7 +35,7 @@
                                                         <a href="{% url 'vendor_detail' item.fooditem.vendor.vendor_slug %}" class="badge badge-warning">{{ item.fooditem.vendor }}</a>
                                                     </div>
                                                     <div class="price-holder">
-                                                        <span class="price">${{ item.fooditem.price }}</span>
+                                                        <span class="price">₹{{ item.fooditem.price }}</span>
 
                                                         <a href="#" class="decrease_cart" data-id="{{ item.fooditem.id }}" id="{{item.id}}" data-url="{% url 'decrease_cart' item.fooditem.id %}" style="margin-right: 28px;"><i class="icon-minus text-color"></i></a>
                                                         <label id="qty-{{item.fooditem.id}}">0</label>
@@ -84,7 +84,7 @@
                                             <li style="list-style-type: none;">
                                                 Subtotal
                                                 <span class="price float-right">
-                                                    <span class="currency">$</span>
+                                                    <span class="currency">₹</span>
                                                     <span id="subtotal">{{ subtotal }}</span>
                                                 </span>
                                             </li>
@@ -94,7 +94,7 @@
                                                     <li style="list-style-type: none;">
                                                         {{ key }} <small>({{ i }}%)</small>
                                                         <span class="price float-right">
-                                                            <span class="currency">$</span>
+                                                            <span class="currency">₹</span>
                                                             <span id="tax-{{ key }}">{{ j }}</span>
                                                         </span>
                                                     </li>
@@ -131,7 +131,7 @@
                             <li style="list-style-type: none; color: green;">
                                 Discount ({{ applied_coupon.code }})
                                 <span class="price float-right" style="color: green;">
-                                    <span class="currency">-$</span>
+                                    <span class="currency">-₹</span>
                                     <span id="discount">{{ discount }}</span>
                                 </span>
                             </li>
@@ -140,7 +140,7 @@
                                             <li style="list-style-type: none; font-weight: 600;">
                                                 TOTAL
                                                 <span class="price float-right">
-                                                    <span class="currency">$</span>
+                                                    <span class="currency">₹</span>
                                                     <span id="total">{{ grand_total }}</span>
                                                 </span>
                                             </li>

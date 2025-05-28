@@ -107,7 +107,7 @@
                                                         <span>{{ item.quantity }} QTY</span>
                                                     </div>
                                                     <div class="price-holder">
-                                                        <span class="price">${{ item.fooditem.price }}</span>
+                                                        <span class="price">₹{{ item.fooditem.price }}</span>
                                                     </div>
                                                 </li>
                                                 {% endfor %}
@@ -123,7 +123,7 @@
                                             <li style="list-style-type: none;">
                                                 Subtotal
                                                 <span class="price float-right">
-                                                    <span class="currency">$</span>
+                                                    <span class="currency">₹</span>
                                                     <span id="subtotal">{{ subtotal }}</span>
                                                 </span>
                                             </li>
@@ -133,7 +133,7 @@
                                                     <li style="list-style-type: none;">
                                                         {{ key }} <small>({{ i }}%)</small>
                                                         <span class="price float-right">
-                                                            <span class="currency">$</span>
+                                                            <span class="currency">₹</span>
                                                             <span id="tax-{{ key }}">{{ j }}</span>
                                                         </span>
                                                     </li>
@@ -142,7 +142,7 @@
                             <li style="list-style-type: none; color: green;">
                                 Discount ({{ applied_coupon.code }}) - {{ applied_coupon.discount_text }}
                                 <span class="price float-right" style="color: green;">
-                                    <span class="currency">-$</span>
+                                    <span class="currency">-₹</span>
                                     <span id="discount">{{ discount }}</span>
                                 </span>
                             </li>
@@ -151,19 +151,112 @@
                                             <li style="list-style-type: none; font-weight: 600;">
                                                 TOTAL
                                                 <span class="price float-right">
-                                                    <span class="currency">$</span>
+                                                    <span class="currency">₹</span>
                                                     <span id="total">{{ grand_total }}</span>
                                                 </span>
                                             </li>                                            <!-- Select payment method -->
-                                            <h5>SELECT PAYMENT METHOD</h5>
-                                            <div class="payment-method">
-                                                <label>
-                                                    <input type="radio" name="payment_method" value="Stripe" checked>
-                                                    <img src="{% static 'images/stripe_logo' %}" alt="Stripe" width="100">
-                                                    <span class="ml-2">Pay securely with Stripe</span>
-                                                </label>
-                                            </div>
-                                            <span class="text-danger" id="payment-method-error"></span>
+                                            <!-- Enhanced version with better styling -->
+<h5 class="mt-3 mb-3">SELECT PAYMENT METHOD</h5>
+<div class="payment-methods">
+    <div class="payment-option">
+        <label class="payment-label">
+            <input type="radio" name="payment_method" value="Stripe" checked>
+            <div class="payment-content d-flex align-items-center p-3">
+                <img src="{% static 'images/stripe_logo.png' %}"
+                     alt="Stripe" width="80" class="mr-3">
+                <div class="payment-info flex-grow-1">
+                    <div class="payment-title">Credit/Debit Card</div>
+                    <div class="payment-subtitle">Powered by Stripe</div>
+                </div>
+                <div class="payment-badges">
+                    <i class="fa fa-cc-visa text-primary"></i>
+                    <i class="fa fa-cc-mastercard text-danger"></i>
+                    <i class="fa fa-cc-amex text-info"></i>
+                </div>
+            </div>
+        </label>
+    </div>
+</div>
+<span class="text-danger" id="payment-method-error"></span>
+
+<!-- Add this CSS for better styling -->
+<style>
+.payment-option {
+    margin-bottom: 1rem;
+}
+
+.payment-label {
+    display: block;
+    cursor: pointer;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0;
+    margin: 0;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.payment-label:hover {
+    border-color: #635bff;
+    box-shadow: 0 2px 8px rgba(99, 91, 255, 0.1);
+}
+
+.payment-content {
+    position: relative;
+}
+
+.payment-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.payment-info .payment-title {
+    font-weight: 600;
+    color: #212529;
+    font-size: 1rem;
+}
+
+.payment-info .payment-subtitle {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 2px;
+}
+
+.payment-badges {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.payment-badges i {
+    font-size: 1.5rem;
+}
+
+/* Selected state */
+.payment-option input[type="radio"]:checked + .payment-content {
+    background-color: #f8f9ff;
+}
+
+.payment-label:has(input:checked) {
+    border-color: #635bff;
+    background-color: #f8f9ff;
+    box-shadow: 0 4px 12px rgba(99, 91, 255, 0.15);
+}
+
+/* Add checkmark for selected option */
+.payment-option input[type="radio"]:checked + .payment-content::after {
+    content: '✓';
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #635bff;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+</style>
                                             <!-- Select payment method -->
 
                                             <button onclick="return payMethodConfirm();" type="submit" class="btn btn-danger w-100 p-2 mt-3">PLACE ORDER</button>
