@@ -137,18 +137,16 @@
                                                             <span id="tax-{{ key }}">{{ j }}</span>
                                                         </span>
                                                     </li>
-                                                {% endfor %}                                            {% endfor %}
-
-                                            <!-- Coupon Discount Display -->
-                                            {% if applied_coupon %}
-                                            <li style="list-style-type: none; color: green;">
-                                                Discount ({{ applied_coupon.code }})
-                                                <span class="price float-right" style="color: green;">
-                                                    <span class="currency">-$</span>
-                                                    <span id="discount">{{ coupon_discount_amount }}</span>
-                                                </span>
-                                            </li>
-                                            {% endif %}
+                                                {% endfor %}                                            {% endfor %}                            <!-- Coupon Discount Display -->
+                            {% if applied_coupon and discount > 0 %}
+                            <li style="list-style-type: none; color: green;">
+                                Discount ({{ applied_coupon.code }}) - {{ applied_coupon.discount_text }}
+                                <span class="price float-right" style="color: green;">
+                                    <span class="currency">-$</span>
+                                    <span id="discount">{{ discount }}</span>
+                                </span>
+                            </li>
+                            {% endif %}
 
                                             <li style="list-style-type: none; font-weight: 600;">
                                                 TOTAL

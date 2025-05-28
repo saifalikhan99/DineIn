@@ -203,8 +203,6 @@ def checkout(request):
 
 # ============== COUPON APPLICATION VIEWS ==============
 
-# ...existing code...
-
 @csrf_exempt
 @login_required(login_url='login')
 def apply_coupon(request):
@@ -266,12 +264,11 @@ def apply_coupon(request):
             
             # Calculate cart total
             cart_total = sum(item.fooditem.price * item.quantity for item in cart_items)
-            
             # Check minimum amount requirement
             if cart_total < coupon.minimum_order_amount:
                 return JsonResponse({
                     'status': 'error',
-                    'message': f'Minimum order amount of ₹{coupon.minimum_order_amount} required for this coupon.'
+                    'message': f'Minimum order amount of ${coupon.minimum_order_amount} required for this coupon.'
                 })
             
             # Calculate discount based on coupon type
@@ -280,28 +277,33 @@ def apply_coupon(request):
                 # Apply maximum discount limit if set
                 if coupon.maximum_discount_amount:
                     discount_amount = min(discount_amount, coupon.maximum_discount_amount)
+                discount_text = f"{coupon.discount_value}% OFF"
             else:  # fixed amount
                 discount_amount = coupon.discount_value
+                discount_text = f"${discount_amount} OFF"
             
             # Ensure discount doesn't exceed cart total
             discount_amount = min(discount_amount, cart_total)
             final_total = cart_total - discount_amount
             
-            # Store coupon in session
+            # Store coupon in session with more details
             request.session['applied_coupon'] = {
                 'id': coupon.id,
                 'code': coupon.code,
-                'discount_amount': float(discount_amount),
+                'name': getattr(coupon, 'name', coupon.code),  # Use coupon name if available
+                'discount_amount': str(discount_amount),  # Store as string
+                'discount_text': discount_text,
                 'vendor_id': vendor.id
             }
-            
             return JsonResponse({
                 'status': 'success',
-                'message': 'Coupon applied successfully!',
+                'message': f'Coupon "{coupon.code}" applied successfully! You saved ${discount_amount:.2f}',
+                'coupon_name': getattr(coupon, 'name', coupon.code),
+                'coupon_code': coupon.code,
                 'discount_amount': float(discount_amount),
+                'discount_text': discount_text,
                 'cart_total': float(cart_total),
-                'final_total': float(final_total),
-                'coupon_code': coupon.code
+                'final_total': float(final_total)
             })
             
         except json.JSONDecodeError as e:
@@ -325,7 +327,6 @@ def apply_coupon(request):
         'message': 'Invalid request method.'
     })
 
-# ...existing code...
 
 @csrf_exempt
 @login_required(login_url='login')

@@ -27,6 +27,7 @@ def get_cart_amounts(request):
     grand_total = 0
     tax_dict = {}
     discount = Decimal('0.00')  # Initialize as Decimal
+    applied_coupon = None
     
     if request.user.is_authenticated:
         cart_items = Cart.objects.filter(user=request.user)
@@ -36,7 +37,8 @@ def get_cart_amounts(request):
 
         # Get applied coupon from session
         if 'applied_coupon' in request.session:
-            discount = Decimal(str(request.session['applied_coupon']['discount_amount']))
+            applied_coupon = request.session['applied_coupon']
+            discount = Decimal(str(applied_coupon['discount_amount']))
         
         # Calculate tax
         get_tax = Tax.objects.filter(is_active=True)
@@ -54,5 +56,6 @@ def get_cart_amounts(request):
         tax=tax, 
         grand_total=grand_total, 
         tax_dict=tax_dict,
-        discount=discount  # Add discount to the context
+        discount=discount,  # Add discount to the context
+        applied_coupon=applied_coupon  # Pass coupon details to template
     )
