@@ -6,7 +6,6 @@
 
 <!-- Main Section Start -->
 <div class="main-section">
-    
     {% include 'includes/cover.html' %}
     <div class="page-section account-header buyer-logged-in">
         <div class="container">
@@ -18,111 +17,288 @@
                 <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
                     <div class="user-dashboard loader-holder">
                         <div class="user-holder">
-                           
-                            <div class="container">
-                                <div class="justify-content-center row">
-                                    <div class="col-md-12">
-                                        <div class="bg-white p-1">
-                                            <img src="{% static 'logo/foodOnlineLogo.png' %}" alt="foodOnline Logo" width="300">
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <h4 class="mt-2 mb-3">Thank you for your order.</h4>
-                                                </div>
-                                                <div class="col-md-6 text-right">
-                                                    <p class="mb-0">{{ order.name }}</p>
-                                                    <p class="mb-0">{{ order.address }}</p>
-                                                    <p class="mb-0">{{ order.phone }}</p>
-                                                    <p class="mb-0">{{ order.email }}</p>
-                                                </div>
-                                            </div>
-                                            
-                                            <h6>Hello {{ order.name }}, </h6><span>Review your order details below.</span>
-                                            <hr>
-                            
-                                            <div class="d-flex justify-content-between">
-                                                <div>
-                                                    <span class="d-block">Order Date: </span><span class="font-weight-bold">{{ order.created_at }}</span>
-                                                </div>
-                                                <div>
-                                                    <span class="d-block">Order No: </span><span class="font-weight-bold">{{ order.order_number }}</span>
-                                                </div>
-                                                <div>
-                                                    <span class="d-block">Payment Method: </span><span class="font-weight-bold">{{ order.payment_method }}</span>
-                                                </div>
-                                                <div>
-                                                    <span class="d-block">Transaction ID: </span><span class="font-weight-bold">{{ order.payment.transaction_id }}</span>
-                                                </div>
-                                            </div>
-                                            <hr>
-                                            <table class="table">
-                                                <tbody>
-                                                    {% for item in ordered_food %}
-                                                    <tr>
-                                                        <td><img src="{{ item.fooditem.image.url }}" width="60" alt="Food Image"></td>
-                                                        <td>
-                                                            <p class="mb-0"><b>{{ item.fooditem }}</b></p>
-                                                            <a class="text-muted" href="{% url 'vendor_detail' item.fooditem.vendor.vendor_slug %}">{{ item.fooditem.vendor.vendor_name }}</a>
-                                                        </td>
-                                                        <td>{{ item.quantity }} QTY</td>
-                                                        <td>₹{{ item.fooditem.price }}</td>
-                                                    </tr>
-                                                    {% endfor %}
-                                                </tbody>
-                                            </table>
-                            
-                                            <div class="row mt-5">
-                                                <div class="d-flex justify-content-center col-md-6">
-                                                    <img src="{% static 'images/paid.png' %}" width="200">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <ul>
-                                                        <li style="list-style-type: none;">
-                                                            Subtotal
-                                                            <span class="price float-right">
-                                                                <span class="currency">₹</span>
-                                                                <span id="subtotal">{{ subtotal }}</span>
+                            <!-- Order Detail Card -->
+                            <div class="card border-0 shadow-lg">
+                                <div class="card-header bg-gradient-primary text-white py-4">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-6">
+                                            <h4 class="mb-0">
+                                                <i class="fa fa-receipt mr-2"></i>Order Details
+                                            </h4>
+                                            <small class="text-light">
+                                                Order #{{ order.order_number }}
+                                            </small>
+                                        </div>
+                                        <div class="col-md-6 text-md-right">
+                                            {% if order.status == 'New' %}
+                                                <span class="badge badge-warning badge-lg px-3 py-2">
+                                                    <i class="fa fa-clock mr-1"></i>{{ order.status }}
+                                                </span>
+                                            {% elif order.status == 'Accepted' %}
+                                                <span class="badge badge-info badge-lg px-3 py-2">
+                                                    <i class="fa fa-check mr-1"></i>{{ order.status }}
+                                                </span>
+                                            {% elif order.status == 'Completed' %}
+                                                <span class="badge badge-success badge-lg px-3 py-2">
+                                                    <i class="fa fa-check-circle mr-1"></i>{{ order.status }}
+                                                </span>
+                                            {% elif order.status == 'Cancelled' %}
+                                                <span class="badge badge-danger badge-lg px-3 py-2">
+                                                    <i class="fa fa-times mr-1"></i>{{ order.status }}
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="card-body p-4">
+                                    <!-- Brand Header -->
+                                    <div class="text-center mb-4">
+                                        <img src="{% static 'logo/foodOnlineLogo.png' %}" alt="foodOnline Logo" class="img-fluid" style="max-width: 200px;">
+                                    </div>
+                                    
+                                    <!-- Order Header Info -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <div class="info-section">
+                                                <h5 class="text-primary mb-3">
+                                                    <i class="fa fa-info-circle mr-2"></i>Order Information
+                                                </h5>
+                                                <div class="info-grid">
+                                                    <div class="info-item">
+                                                        <span class="label">Order Date:</span>
+                                                        <span class="value">{{ order.created_at|date:"M d, Y" }}</span>
+                                                    </div>
+                                                    <div class="info-item">
+                                                        <span class="label">Order Time:</span>
+                                                        <span class="value">{{ order.created_at|date:"h:i A" }}</span>
+                                                    </div>
+                                                    <div class="info-item">
+                                                        <span class="label">Payment Method:</span>
+                                                        <span class="value">
+                                                            <span class="badge badge-outline-primary">
+                                                                <i class="fa fa-credit-card mr-1"></i>{{ order.payment_method }}
                                                             </span>
-                                                        </li>
-                            
-                                                        {% for key, value in tax_data.items %}
-                                                            {% for i, j in value.items %}
-                                                                <li style="list-style-type: none;">
-                                                                    {{ key }} <small>({{ i }}%)</small>
-                                                                    <span class="price float-right">
-                                                                        <span class="currency">₹</span>
-                                                                        <span id="tax-{{ key }}">{{ j }}</span>
-                                                                    </span>
-                                                                </li>
-                                                            {% endfor %}
-                                                        {% endfor %}
-                            
-                            
-                                                        <li style="list-style-type: none; font-weight: 600;">
-                                                            TOTAL
-                                                            <span class="price float-right">
-                                                                <span class="currency">₹</span>
-                                                                <span id="total">{{ grand_total }}</span>
-                                                            </span>
-                                                        </li>
-                                                    </ul>
+                                                        </span>
+                                                    </div>
+                                                    <div class="info-item">
+                                                        <span class="label">Transaction ID:</span>
+                                                        <span class="value font-monospace">{{ order.payment.transaction_id }}</span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <hr>
-                                            <div class="d-flex justify-content-between">
-                                                <div>
-                                                    <span class="d-block font-weight-bold">Thanks for ordering with us.</span>
-                                                    <span>FoodOnline Team</span>
-                                                </div>
-                                                <div class="d-flex justify-content-end align-items-end">
-                                                    <span class="d-block font-weight-bold">Need help?</span>
-                                                    <span>Call - +91 0011223344</span>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="info-section">
+                                                <h5 class="text-primary mb-3">
+                                                    <i class="fa fa-user mr-2"></i>Customer Information
+                                                </h5>
+                                                <div class="customer-card bg-light p-3 rounded">
+                                                    <div class="customer-header mb-2">
+                                                        <div class="customer-avatar bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mr-3" style="width: 40px; height: 40px;">
+                                                            {{ order.name|first|upper }}
+                                                        </div>
+                                                        <div class="customer-details d-inline-block">
+                                                            <h6 class="mb-0 font-weight-bold">{{ order.name }}</h6>
+                                                            <small class="text-muted">{{ order.email }}</small>
+                                                        </div>
+                                                    </div>
+                                                    <div class="customer-contact">
+                                                        <p class="mb-1">
+                                                            <i class="fa fa-phone text-success mr-2"></i>{{ order.phone }}
+                                                        </p>
+                                                        <p class="mb-0">
+                                                            <i class="fa fa-map-marker-alt text-danger mr-2"></i>
+                                                            {{ order.address }}, {{ order.city }} - {{ order.pin_code }}<br>
+                                                            <span class="ml-4">{{ order.state }}, {{ order.country }}</span>
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
+
+                                    <hr class="my-4">
+
+                                    <!-- Order Items -->
+                                    <div class="order-items-section mb-4">
+                                        <h5 class="text-primary mb-3">
+                                            <i class="fa fa-utensils mr-2"></i>Ordered Items
+                                        </h5>
+                                        <div class="table-responsive">
+                                            <table class="table table-hover modern-table">
+                                                <thead class="bg-light">
+                                                    <tr>
+                                                        <th scope="col" class="border-0">Item</th>
+                                                        <th scope="col" class="border-0">Restaurant</th>
+                                                        <th scope="col" class="border-0 text-center">Qty</th>
+                                                        <th scope="col" class="border-0 text-right">Unit Price</th>
+                                                        <th scope="col" class="border-0 text-right">Total</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for item in ordered_food %}
+                                                    <tr class="item-row">
+                                                        <td class="py-3">
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="item-image mr-3">
+                                                                    <img src="{{ item.fooditem.image.url }}" alt="{{ item.fooditem }}" class="rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                                                                </div>
+                                                                <div class="item-details">
+                                                                    <h6 class="mb-0 font-weight-bold">{{ item.fooditem }}</h6>
+                                                                    <small class="text-muted">{{ item.fooditem.description|truncatechars:50 }}</small>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td class="py-3">
+                                                            <a href="{% url 'vendor_detail' item.fooditem.vendor.vendor_slug %}" class="text-decoration-none">
+                                                                <span class="badge badge-outline-info">
+                                                                    <i class="fa fa-store mr-1"></i>{{ item.fooditem.vendor.vendor_name }}
+                                                                </span>
+                                                            </a>
+                                                        </td>
+                                                        <td class="py-3 text-center">
+                                                            <span class="badge badge-secondary px-3 py-2">{{ item.quantity }}</span>
+                                                        </td>
+                                                        <td class="py-3 text-right">
+                                                            <span class="font-weight-medium">₹{{ item.fooditem.price|floatformat:2 }}</span>
+                                                        </td>
+                                                        <td class="py-3 text-right">
+                                                            <span class="font-weight-bold text-success">₹{{ item.amount|floatformat:2 }}</span>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <hr class="my-4">
+
+                                    <!-- Order Summary -->
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="payment-confirmation text-center">
+                                                <img src="{% static 'images/paid.png' %}" alt="Payment Confirmed" class="img-fluid" style="max-width: 200px;">
+                                                <h5 class="text-success mt-3 mb-2">Payment Confirmed</h5>
+                                                <p class="text-muted">Your payment has been successfully processed</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="order-summary-card bg-light p-4 rounded">
+                                                <h5 class="text-primary mb-3">
+                                                    <i class="fa fa-calculator mr-2"></i>Order Summary
+                                                </h5>
+                                                <div class="summary-items">
+                                                    <div class="summary-item d-flex justify-content-between">
+                                                        <span>Subtotal:</span>
+                                                        <span class="font-weight-medium">₹{{ subtotal|floatformat:2 }}</span>
+                                                    </div>
+
+                                                    {% for key, value in tax_data.items %}
+                                                        {% for rate, amount in value.items %}
+                                                        <div class="summary-item d-flex justify-content-between">
+                                                            <span>{{ key }} ({{ rate }}%):</span>
+                                                            <span class="font-weight-medium">₹{{ amount|floatformat:2 }}</span>
+                                                        </div>
+                                                        {% endfor %}
+                                                    {% endfor %}
+
+                                                    {% if order.coupon_code and order.coupon_discount > 0 %}
+                                                    <div class="summary-item d-flex justify-content-between text-success">
+                                                        <span>
+                                                            <i class="fa fa-tag mr-1"></i>Discount 
+                                                            {% if 'MM20' in order.coupon_code %}
+                                                                (MM20):
+                                                            {% elif 'YES50' in order.coupon_code %}
+                                                                (YES50):
+                                                            {% elif 'SAVE10' in order.coupon_code %}
+                                                                (SAVE10):
+                                                            {% elif 'WELCOME' in order.coupon_code %}
+                                                                (WELCOME):
+                                                            {% else %}
+                                                                (Applied):
+                                                            {% endif %}
+                                                        </span>
+                                                        <span class="font-weight-medium">-₹{{ order.coupon_discount|floatformat:2 }}</span>
+                                                    </div>
+                                                    {% endif %}
+
+                                                    <hr class="my-3">
+                                                    
+                                                    <div class="summary-item d-flex justify-content-between total-row">
+                                                        <span class="h5 font-weight-bold">TOTAL:</span>
+                                                        <span class="h5 font-weight-bold text-success">₹{{ order.total|floatformat:2 }}</span>
+                                                    </div>
+
+                                                    {% if order.coupon_code and order.coupon_discount > 0 %}
+                                                    <div class="mt-3">
+                                                        <div class="alert alert-success alert-sm border-0">
+                                                            <i class="fa fa-gift mr-2"></i>
+                                                            <strong>Congratulations!</strong> You saved ₹{{ order.coupon_discount|floatformat:2 }} with coupon 
+                                                            {% if 'MM20' in order.coupon_code %}
+                                                                "MM20".
+                                                            {% elif 'YES50' in order.coupon_code %}
+                                                                "YES50".
+                                                            {% elif 'SAVE10' in order.coupon_code %}
+                                                                "SAVE10".
+                                                            {% elif 'WELCOME' in order.coupon_code %}
+                                                                "WELCOME".
+                                                            {% else %}
+                                                                "Applied".
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <hr class="my-4">
+
+                                    <!-- Footer -->
+                                    <div class="order-footer">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-6">
+                                                <div class="thank-you-section">
+                                                    <h5 class="text-primary mb-2">
+                                                        <i class="fa fa-heart text-danger mr-2"></i>Thank you for your order!
+                                                    </h5>
+                                                    <p class="text-muted mb-0">
+                                                        We appreciate your business with <strong>FoodOnline</strong>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 text-md-right">
+                                                <div class="help-section">
+                                                    <h6 class="text-primary mb-2">
+                                                        <i class="fa fa-headset mr-2"></i>Need Help?
+                                                    </h6>
+                                                    <p class="mb-1">
+                                                        <i class="fa fa-phone mr-2 text-success"></i>
+                                                        <a href="tel:+910011223344" class="text-decoration-none">+91 0011223344</a>
+                                                    </p>
+                                                    <p class="mb-0">
+                                                        <i class="fa fa-envelope mr-2 text-info"></i>
+                                                        <a href="mailto:support@foodonline.com" class="text-decoration-none">support@foodonline.com</a>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Action Buttons -->
+                                    <div class="action-buttons mt-4 text-center">
+                                        <a href="{% url 'vendor' %}" class="btn btn-outline-primary mr-3">
+                                            <i class="fa fa-arrow-left mr-2"></i>Back to Dashboard
+                                        </a>
+                                        <button onclick="window.print()" class="btn btn-primary">
+                                            <i class="fa fa-print mr-2"></i>Print Order
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                            
                         </div>
                     </div>
                 </div>
@@ -132,5 +308,166 @@
 </div>
 <!-- Main Section End -->
 
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    }
+    
+    .card {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    
+    .info-section {
+        margin-bottom: 20px;
+    }
+    
+    .info-grid .info-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        padding: 8px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .info-grid .info-item:last-child {
+        border-bottom: none;
+    }
+    
+    .info-grid .label {
+        font-weight: 600;
+        color: #6c757d;
+    }
+    
+    .info-grid .value {
+        font-weight: 500;
+        color: #495057;
+    }
+    
+    .customer-card {
+        border: 1px solid #e9ecef;
+    }
+    
+    .customer-avatar {
+        font-size: 16px;
+        font-weight: bold;
+    }
+    
+    .modern-table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    
+    .modern-table th {
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 15px;
+    }
+    
+    .modern-table td {
+        padding: 15px;
+        vertical-align: middle;
+        border-top: 1px solid #f1f3f4;
+    }
+    
+    .item-row:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .order-summary-card {
+        border: 1px solid #e9ecef;
+    }
+    
+    .summary-item {
+        margin-bottom: 12px;
+        padding: 8px 0;
+    }
+    
+    .summary-item:not(.total-row) {
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .total-row {
+        background-color: #f8f9fa;
+        padding: 15px !important;
+        margin: 0 -15px;
+        border-radius: 8px;
+    }
+    
+    .badge-lg {
+        font-size: 14px;
+        padding: 8px 16px;
+    }
+    
+    .badge-outline-primary {
+        color: #007bff;
+        background-color: transparent;
+        border: 1px solid #007bff;
+    }
+    
+    .badge-outline-info {
+        color: #17a2b8;
+        background-color: transparent;
+        border: 1px solid #17a2b8;
+    }
+    
+    .font-monospace {
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        background-color: #f8f9fa;
+        padding: 4px 8px;
+        border-radius: 4px;
+    }
+    
+    .alert-sm {
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+    
+    .action-buttons .btn {
+        min-width: 150px;
+        padding: 10px 20px;
+        font-weight: 500;
+    }
+    
+    @media print {
+        .action-buttons,
+        .card-header .badge,
+        .sidebar {
+            display: none !important;
+        }
+        
+        .card {
+            border: none !important;
+            box-shadow: none !important;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 20px;
+        }
+        
+        .customer-header {
+            text-align: center;
+        }
+        
+        .customer-avatar {
+            margin-bottom: 10px;
+        }
+        
+        .info-grid .info-item {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .action-buttons .btn {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    }
+</style>
 
 {% endblock %}

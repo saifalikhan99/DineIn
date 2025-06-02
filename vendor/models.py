@@ -211,44 +211,6 @@ class CouponUsage(models.Model):
     
     def __str__(self):
         return f"{self.coupon.code} used by {self.user.username} - ₹{self.discount_amount}"
-
-
-class Coupon(models.Model):
-    DISCOUNT_TYPES = [
-        ('PERCENTAGE', 'Percentage'),
-        ('FIXED', 'Fixed Amount'),
-    ]
-    
-    vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='coupons')
-    code = models.CharField(max_length=20, unique=True, help_text="Unique coupon code")
-    name = models.CharField(max_length=100, help_text="Coupon name/description")
-    discount_type = models.CharField(max_length=10, choices=DISCOUNT_TYPES, default='PERCENTAGE')
-    discount_value = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2,
-        validators=[MinValueValidator(0.01)],
-        help_text="Discount percentage (0-100) or fixed amount"
-    )
-    minimum_order_amount = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2, 
-        default=0,
-        validators=[MinValueValidator(0)],
-        help_text="Minimum order amount to apply coupon"
-    )
-    maximum_discount_amount = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2, 
-        null=True, 
-        blank=True,
-        validators=[MinValueValidator(0.01)],
-        help_text="Maximum discount amount (applicable for percentage discounts)"
-    )
-    usage_limit = models.PositiveIntegerField(
-        null=True, 
-        blank=True,
-        help_text="Maximum number of times this coupon can be used (leave blank for unlimited)"
-    )
     usage_limit_per_user = models.PositiveIntegerField(
         default=1,
         validators=[MinValueValidator(1)],

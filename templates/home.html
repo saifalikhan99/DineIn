@@ -66,8 +66,7 @@
 				</div>
 				
 			</div>
-		</div>
-	</div>
+		</div>	</div>
 	<!-- Main Search End -->
 	
 	<!-- Top Restarurants Section Start -->
@@ -137,14 +136,26 @@
 										</span>
 										{% endif %}
 
-									</div>
-									<div class="text-holder">
+									</div>									<div class="text-holder">
 										
 										<div class="post-title">
 											<h5>
 												<a href="{% url 'vendor_detail' vendor.vendor_slug %}">{{ vendor }}</a>
 											</h5>
 										</div>
+										
+										<!-- Offer Badge for Home Page -->
+										{% if vendor.best_offer %}
+										<div class="home-offer-badge" style="background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%); color: white; padding: 4px 10px; border-radius: 15px; font-size: 11px; font-weight: bold; display: inline-block; margin: 5px 0;">
+											<i class="fa fa-tags" style="margin-right: 3px;"></i>
+											{% if vendor.best_offer.discount_type == 'Percentage' %}
+											{{ vendor.best_offer.discount_value }}% OFF
+											{% else %}
+											₹{{ vendor.best_offer.discount_value }} OFF
+											{% endif %}
+										</div>
+										{% endif %}
+										
 										{% if vendor.user_profile.city and vendor.user_profile.state and vendor.user_profile.pin_code %}
 										<span>{{ vendor.user_profile.city }}, {{ vendor.user_profile.state }}, {{ vendor.user_profile.pin_code }}</span>
 										{% endif %}
@@ -179,4 +190,134 @@
 	<!-- Home Pages Elements End  -->
 </div>
 <!-- Main Section End -->
+
+<style>
+.offers-slider::-webkit-scrollbar {
+    height: 8px;
+}
+
+.offers-slider::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+}
+
+.offers-slider::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.5);
+    border-radius: 10px;
+}
+
+.offers-slider::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.7);
+}
+
+.offer-cta-btn:hover {
+    background: #e55a2b !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.offer-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.15) !important;
+    transition: all 0.3s ease;
+}
+
+.copy-home-coupon-btn:hover {
+    background: #e55a2b !important;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Copy coupon code functionality for home page
+    document.querySelectorAll('.copy-home-coupon-btn').forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const couponCode = this.getAttribute('data-code');
+            const originalText = this.innerHTML;
+            
+            // Create temporary input element to copy text
+            const tempInput = document.createElement('input');
+            tempInput.value = couponCode;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            
+            try {
+                document.execCommand('copy');
+                
+                // Show success feedback
+                this.innerHTML = 'COPIED!';
+                this.style.background = '#28a745';
+                
+                // Show toast notification
+                showHomeToast('Coupon "' + couponCode + '" copied! Visit the restaurant to use it.', 'success');
+                
+                // Reset button after 2 seconds
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                    this.style.background = '#ff6b35';
+                }, 2000);
+                
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                showHomeToast('Failed to copy coupon code', 'error');
+            }
+            
+            document.body.removeChild(tempInput);
+        });
+    });
+    
+    // Toast notification function for home page
+    function showHomeToast(message, type) {
+        // Remove existing toast if any
+        const existingToast = document.querySelector('.home-coupon-toast');
+        if (existingToast) {
+            existingToast.remove();
+        }
+        
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = 'home-coupon-toast';
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'success' ? '#28a745' : '#dc3545'};
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+            z-index: 9999;
+            font-weight: bold;
+            font-size: 14px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            max-width: 300px;
+        `;
+        toast.innerHTML = `<i class="fa fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i> ${message}`;
+        
+        document.body.appendChild(toast);
+        
+        // Animate in
+        setTimeout(() => {
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateX(0)';
+        }, 100);
+        
+        // Animate out and remove
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }, 4000);
+    }
+});
+</script>
+
 {% endblock %}

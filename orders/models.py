@@ -9,7 +9,8 @@ request_object = ''
 
 class Payment(models.Model):
     PAYMENT_METHOD = (
-        ('Stripe', 'Stripe'),
+        ('PayPal', 'PayPal'),
+        ('RazorPay', 'RazorPay'), 
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     transaction_id = models.CharField(max_length=100)

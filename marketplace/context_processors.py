@@ -33,12 +33,11 @@ def get_cart_amounts(request):
         cart_items = Cart.objects.filter(user=request.user)
         for item in cart_items:
             fooditem = FoodItem.objects.get(pk=item.fooditem.id)
-            subtotal += (fooditem.price * item.quantity)
-
-        # Get applied coupon from session
+            subtotal += (fooditem.price * item.quantity)        # Get applied coupon from session
         if 'applied_coupon' in request.session:
             applied_coupon = request.session['applied_coupon']
-            discount = Decimal(str(applied_coupon['discount_amount']))
+            # Safely get discount_amount with fallback
+            discount = Decimal(str(applied_coupon.get('discount_amount', '0.00')))
         
         # Calculate tax
         get_tax = Tax.objects.filter(is_active=True)

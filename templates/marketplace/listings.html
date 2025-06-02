@@ -40,14 +40,30 @@
                                             {% else %}
                                             <span class="restaurant-status close"><em class="bookmarkRibbon"></em>Close</span>
                                             {% endif %}
-                                        </div>
-                                        <div class="text-holder">
+                                        </div>                                        <div class="text-holder">
                                             
                                             <div class="post-title">
                                                 <h5>
                                                     <a href="{% url 'vendor_detail' vendor.vendor_slug %}">{{ vendor.vendor_name }}</a>
                                                 </h5>
                                             </div>
+                                            
+                                            <!-- Offer Badge Start -->
+                                            {% if vendor.best_offer %}
+                                            <div class="offer-badge" style="background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%); color: white; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; display: inline-block; margin: 5px 0; box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);">
+                                                <i class="fa fa-tags" style="margin-right: 4px;"></i>
+                                                {% if vendor.best_offer.discount_type == 'Percentage' %}
+                                                {{ vendor.best_offer.discount_value }}% OFF
+                                                {% else %}
+                                                ₹{{ vendor.best_offer.discount_value }} OFF
+                                                {% endif %}
+                                                {% if vendor.best_offer.minimum_order_amount %}
+                                                <span style="font-size: 10px; opacity: 0.9;"> | Min ₹{{ vendor.best_offer.minimum_order_amount }}</span>
+                                                {% endif %}
+                                            </div>
+                                            {% endif %}
+                                            <!-- Offer Badge End -->
+                                            
                                             {% if vendor.user_profile.address %}
                                             <span><small class="text-muted">{{ vendor.user_profile.address }}</small></span>
                                             {% endif %}

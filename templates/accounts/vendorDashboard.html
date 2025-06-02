@@ -17,77 +17,210 @@
                 <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
                     <div class="user-dashboard loader-holder">
                         <div class="user-holder">
-                            <h5 class="text-uppercase">Overview</h5>
-                            <p class="text-right">Logged in as: <b>{{ user.email }}</b></p>
-                            <div class="row">
-                                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            Total Orders
+                            <!-- Header Section -->
+                            <div class="dashboard-header mb-4">
+                                <h3 class="text-uppercase mb-2">
+                                    <i class="fa fa-chart-line text-primary mr-2"></i>Dashboard Overview
+                                </h3>
+                                <p class="text-muted mb-0">
+                                    <i class="fa fa-user text-success mr-2"></i>
+                                    Logged in as: <strong class="text-primary">{{ user.email }}</strong>
+                                </p>
+                            </div>
+
+                            <!-- Statistics Cards -->
+                            <div class="row mb-5">
+                                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 mb-3">
+                                    <div class="card border-0 shadow-sm h-100 stats-card">
+                                        <div class="card-header bg-primary text-white d-flex align-items-center">
+                                            <i class="fa fa-shopping-bag fa-lg mr-2"></i>
+                                            <span class="font-weight-bold">Total Orders</span>
                                         </div>
-                                        <div class="card-body text-center">
-                                            <a href="#"><h5 class="card-title">{{ orders_count }}</h5></a>
+                                        <div class="card-body text-center py-4">
+                                            <h3 class="card-title text-primary font-weight-bold mb-2">{{ orders_count }}</h3>
+                                            <p class="text-muted small mb-0">All time orders</p>
+                                        </div>
+                                        <div class="card-footer bg-light text-center border-0">
+                                            <small class="text-success">
+                                                <i class="fa fa-arrow-up mr-1"></i>Active business
+                                            </small>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            Total Revenue
+
+                                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 mb-3">
+                                    <div class="card border-0 shadow-sm h-100 stats-card">
+                                        <div class="card-header bg-success text-white d-flex align-items-center">
+                                            <i class="fa fa-rupee-sign fa-lg mr-2"></i>
+                                            <span class="font-weight-bold">Total Revenue</span>
                                         </div>
-                                        <div class="card-body text-center">
-                                            <a href="#"><h5 class="card-title">${{total_revenue | floatformat:2}}</h5></a>
+                                        <div class="card-body text-center py-4">
+                                            <h3 class="card-title text-success font-weight-bold mb-2">₹{{ total_revenue|floatformat:2 }}</h3>
+                                            <p class="text-muted small mb-0">After discounts</p>
+                                        </div>
+                                        <div class="card-footer bg-light text-center border-0">
+                                            <small class="text-info">
+                                                <i class="fa fa-info-circle mr-1"></i>Net earnings
+                                            </small>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            This Month
+
+                                <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 mb-3">
+                                    <div class="card border-0 shadow-sm h-100 stats-card">
+                                        <div class="card-header bg-info text-white d-flex align-items-center">
+                                            <i class="fa fa-calendar-alt fa-lg mr-2"></i>
+                                            <span class="font-weight-bold">This Month</span>
                                         </div>
-                                        <div class="card-body text-center">
-                                            <a href="#"><h5 class="card-title">${{ current_month_revenue | floatformat:2}}</h5></a>
+                                        <div class="card-body text-center py-4">
+                                            <h3 class="card-title text-info font-weight-bold mb-2">₹{{ current_month_revenue|floatformat:2 }}</h3>
+                                            <p class="text-muted small mb-0">Current month earnings</p>
+                                        </div>
+                                        <div class="card-footer bg-light text-center border-0">
+                                            <small class="text-primary">
+                                                <i class="fa fa-trending-up mr-1"></i>Monthly progress
+                                            </small>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <br>
-                            <br>
-                            
-                            <h5 class="text-uppercase">Recent Orders</h5>
-                            <div class="row">
-                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                    <div class="user-orders-list">
-                                        <div class="responsive-table">
-                                            <table class="table table-hover table-borderless" id="myOrdersTable">
-                                                <thead>
-                                                  <tr>
-                                                    <th scope="col">Order #</th>
-                                                    <th scope="col">Name</th>
-                                                    <th scope="col">Total</th>
-                                                    <th scope="col">Status</th>
-                                                    <th scope="col">Date</th>
-                                                    <th scope="col">Action</th>
-                                                  </tr>
+
+                            <!-- Recent Orders Section -->
+                            <div class="recent-orders-section">
+                                <div class="section-header mb-4">
+                                    <h4 class="text-uppercase mb-0">
+                                        <i class="fa fa-clock text-warning mr-2"></i>Recent Orders
+                                    </h4>
+                                    <p class="text-muted small mb-0">Latest 10 orders with discount information</p>
+                                </div>
+
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-body p-0">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover mb-0 modern-table" id="myOrdersTable">
+                                                <thead class="bg-light">
+                                                    <tr>
+                                                        <th scope="col" class="border-0 py-3">
+                                                            <i class="fa fa-hashtag text-muted mr-1"></i>Order #
+                                                        </th>
+                                                        <th scope="col" class="border-0 py-3">
+                                                            <i class="fa fa-user text-muted mr-1"></i>Customer
+                                                        </th>
+                                                        <th scope="col" class="border-0 py-3">
+                                                            <i class="fa fa-rupee-sign text-muted mr-1"></i>Amount
+                                                        </th>
+                                                        <th scope="col" class="border-0 py-3">
+                                                            <i class="fa fa-info-circle text-muted mr-1"></i>Status
+                                                        </th>
+                                                        <th scope="col" class="border-0 py-3">
+                                                            <i class="fa fa-calendar text-muted mr-1"></i>Date
+                                                        </th>
+                                                        <th scope="col" class="border-0 py-3">
+                                                            <i class="fa fa-cog text-muted mr-1"></i>Action
+                                                        </th>
+                                                    </tr>
                                                 </thead>
                                                 <tbody>
                                                     {% for order in recent_orders %}
-                                                  <tr>
-                                                    <td>{{ order.order_number }}</td>
-                                                    <td>{{ order.name }}</td>
-                                                    <td>${{ order.get_total_by_vendor.grand_total }}</td>
-                                                    <td>{{ order.status }}</td>
-                                                    <td>{{ order.created_at }}</td>
-                                                    <td><a href="{% url 'vendor_order_detail' order.order_number %}" class="btn btn-danger">Details</a></td>
-                                                  </tr>
-                                                  {% endfor %}
+                                                    <tr class="order-row">
+                                                        <td class="py-3">
+                                                            <strong class="text-primary">#{{ order.order_number }}</strong>
+                                                        </td>
+                                                        <td class="py-3">
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="customer-avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-2" style="width: 32px; height: 32px; font-size: 12px;">
+                                                                    {{ order.name|first|upper }}
+                                                                </div>
+                                                                <div>
+                                                                    <div class="font-weight-medium">{{ order.name }}</div>
+                                                                    <small class="text-muted">{{ order.email }}</small>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td class="py-3">
+                                                            {% with vendor_total=order.get_total_by_vendor.grand_total %}
+                                                                {% if order.coupon_discount and order.coupon_discount > 0 %}
+                                                                    <!-- Calculate the final amount after discount -->
+                                                                    {% with final_amount=order.total original_amount=order.total|add:order.coupon_discount %}
+                                                                    <div class="price-info">
+                                                                        <div class="current-price text-success font-weight-bold">
+                                                                            ₹{{ final_amount|floatformat:2 }}
+                                                                        </div>
+                                                                        <div class="discount-info">
+                                                                            <small class="text-muted">
+                                                                                Original: <del class="text-danger">₹{{ original_amount|floatformat:2 }}</del>
+                                                                            </small>
+                                                                            <br>
+                                                                            <small class="text-success">
+                                                                                <i class="fa fa-tag mr-1"></i>Saved ₹{{ order.coupon_discount|floatformat:2 }}
+                                                                            </small>
+                                                                        </div>
+                                                                    </div>
+                                                                    {% endwith %}
+                                                                {% else %}
+                                                                    <div class="current-price text-success font-weight-bold">
+                                                                        ₹{{ vendor_total|floatformat:2 }}
+                                                                    </div>
+                                                                    <small class="text-muted">No discount applied</small>
+                                                                {% endif %}
+                                                            {% endwith %}
+                                                        </td>
+                                                        <td class="py-3">
+                                                            {% if order.status == 'New' %}
+                                                                <span class="badge badge-warning px-3 py-2">
+                                                                    <i class="fa fa-clock mr-1"></i>{{ order.status }}
+                                                                </span>
+                                                            {% elif order.status == 'Accepted' %}
+                                                                <span class="badge badge-info px-3 py-2">
+                                                                    <i class="fa fa-check mr-1"></i>{{ order.status }}
+                                                                </span>
+                                                            {% elif order.status == 'Completed' %}
+                                                                <span class="badge badge-success px-3 py-2">
+                                                                    <i class="fa fa-check-circle mr-1"></i>{{ order.status }}
+                                                                </span>
+                                                            {% elif order.status == 'Cancelled' %}
+                                                                <span class="badge badge-danger px-3 py-2">
+                                                                    <i class="fa fa-times mr-1"></i>{{ order.status }}
+                                                                </span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td class="py-3">
+                                                            <div class="date-info">
+                                                                <div class="font-weight-medium">{{ order.created_at|date:"M d, Y" }}</div>
+                                                                <small class="text-muted">{{ order.created_at|date:"h:i A" }}</small>
+                                                            </div>
+                                                        </td>
+                                                        <td class="py-3">
+                                                            <a href="{% url 'vendor_order_detail' order.order_number %}" 
+                                                               class="btn btn-sm btn-outline-primary btn-action">
+                                                                <i class="fa fa-eye mr-1"></i>View Details
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                    {% empty %}
+                                                    <tr>
+                                                        <td colspan="6" class="text-center py-5">
+                                                            <div class="empty-state">
+                                                                <i class="fa fa-shopping-bag fa-3x text-muted mb-3"></i>
+                                                                <h5 class="text-muted">No orders yet</h5>
+                                                                <p class="text-muted">When customers place orders, they will appear here.</p>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
                                                 </tbody>
-                                              </table>
-                                        </div>												
+                                            </table>
+                                        </div>
                                     </div>
+                                    {% if recent_orders %}
+                                    <div class="card-footer bg-light border-0 text-center">
+                                        <a href="#" class="btn btn-link text-primary">
+                                            <i class="fa fa-list mr-2"></i>View All Orders
+                                        </a>
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
-                            
                         </div>
                     </div>
                 </div>
@@ -97,5 +230,95 @@
 </div>
 <!-- Main Section End -->
 
+<style>
+    .stats-card {
+        transition: transform 0.2s ease-in-out;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .dashboard-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 20px;
+        border-radius: 10px;
+        border-left: 4px solid #007bff;
+    }
+    
+    .modern-table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    
+    .order-row {
+        transition: background-color 0.2s ease;
+    }
+    
+    .order-row:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .customer-avatar {
+        font-weight: bold;
+        font-size: 12px !important;
+    }
+    
+    .price-info {
+        line-height: 1.2;
+    }
+    
+    .discount-info {
+        margin-top: 4px;
+    }
+    
+    .btn-action {
+        transition: all 0.2s ease;
+    }
+    
+    .btn-action:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+    }
+    
+    .empty-state {
+        padding: 40px 20px;
+    }
+    
+    .section-header {
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 15px;
+    }
+    
+    .date-info {
+        line-height: 1.3;
+    }
+    
+    .badge {
+        font-size: 11px;
+        font-weight: 500;
+    }
+    
+    .card {
+        border-radius: 12px;
+    }
+    
+    .card-header {
+        border-radius: 12px 12px 0 0 !important;
+        font-size: 14px;
+    }
+    
+    .table td {
+        vertical-align: middle;
+        border-top: 1px solid #f1f3f4;
+    }
+    
+    .table th {
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+</style>
 
 {% endblock %}

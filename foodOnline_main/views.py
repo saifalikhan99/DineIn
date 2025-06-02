@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 
-from vendor.models import Vendor
+from vendor.models import Vendor, Coupon
+from datetime import datetime
 
 from django.contrib.gis.geos import GEOSGeometry
 from django.contrib.gis.measure import D # ``D`` is a shortcut for ``Distance``
@@ -33,7 +34,21 @@ def home(request):
             v.kms = round(v.distance.km, 1)
     else:
         vendors = Vendor.objects.filter(is_approved=True, user__is_active=True)[:8]
+      # Add best offer information for each vendor
+    for vendor in vendors:
+        best_coupon = Coupon.objects.filter(
+            vendor=vendor,
+            is_active=True,
+            valid_from__lte=datetime.now(),
+            valid_until__gte=datetime.now()
+        ).order_by('-discount_value').first()
+        vendor.best_offer = best_coupon
+    
+    # Filter vendors that have offers for the special offers section
+    vendors_with_offers = [vendor for vendor in vendors if vendor.best_offer is not None]
+    
     context = {
         'vendors': vendors,
+        'vendors_with_offers': vendors_with_offers,
     }
     return render(request, 'home.html', context)

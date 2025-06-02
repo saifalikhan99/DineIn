@@ -265,8 +265,19 @@ def order_detail(request, order_number):
 
 def my_orders(request):
     vendor = Vendor.objects.get(user=request.user)
-    orders = Order.objects.filter(vendors__in=[vendor.id], is_ordered=True).order_by('created_at')
+    orders = Order.objects.filter(vendors__in=[vendor.id], is_ordered=True).order_by('-created_at')
 
+    # Calculate vendor-specific totals for each order
+    for order in orders:
+        vendor_totals = order.get_total_by_vendor()
+        # Set the actual amount the customer paid to this vendor (after discounts)
+        order.vendor_grand_total = vendor_totals['grand_total']
+        order.vendor_subtotal = vendor_totals['subtotal']
+        order.vendor_tax_dict = vendor_totals['tax_dict']
+        
+        # Calculate total tax amount for display
+        order.vendor_tax_total = sum(vendor_totals['tax_dict'].values()) if vendor_totals['tax_dict'] else 0
+    print(orders)
     context = {
         'orders': orders,
     }

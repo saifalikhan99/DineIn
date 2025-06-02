@@ -62,19 +62,72 @@
             <!-- Row End -->
         </div>
         <!-- Container End -->
+    </div>    <!-- Coupons Section Start -->
+    {% if vendor_coupons %}
+    <div class="page-section" style="padding: 15px 0; border-bottom: 1px solid #e7e7e7;">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">                    <h5 style="color: #333333; margin-bottom: 15px; font-weight: normal; border-bottom: 1px solid #dddddd; padding-bottom: 8px;">
+                        <i class="fa fa-tags" style="color: #777777; margin-right: 8px;"></i> Available Offers
+                    </h5>
+                    <div class="coupon-container" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        {% for coupon in vendor_coupons %}
+                        <div class="coupon-card" style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 12px; flex: 0 0 auto; min-width: 250px; max-width: 300px; position: relative; transition: all 0.2s ease;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <div style="flex: 1;">
+                                    <span style="color: #333; font-weight: 600; font-size: 13px;">{{ coupon.name }}</span>
+                                </div>                                <div style="background: #f5f5f5; border: 1px solid #cccccc; color: #555555; border-radius: 3px; padding: 4px 8px; font-size: 11px; font-weight: bold;">
+                                    {% if coupon.discount_type == 'PERCENTAGE' %}
+                                    {{ coupon.discount_value }}% OFF
+                                    {% else %}
+                                    ₹{{ coupon.discount_value }} OFF
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div style="background: white; border: 1px dashed #dee2e6; border-radius: 3px; padding: 8px; margin-bottom: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <span style="color: #333; font-weight: bold; font-size: 14px; font-family: monospace;">{{ coupon.code }}</span>
+                                        <div style="color: #777; font-size: 11px;">Coupon Code</div>
+                                    </div>                                    <button class="copy-coupon-btn" data-code="{{ coupon.code }}" style="background: #337ab7; color: white; border: none; padding: 5px 10px; border-radius: 3px; font-size: 10px; cursor: pointer; transition: background 0.2s ease;">
+                                        <i class="fa fa-copy"></i> COPY
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div style="font-size: 11px; color: #777; line-height: 1.3;">
+                                {% if coupon.minimum_order_amount %}
+                                <div>Min order: ₹{{ coupon.minimum_order_amount }}</div>
+                                {% endif %}
+                                <div>Valid till: {{ coupon.valid_until|date:"M d, Y" }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+    {% endif %}
+    <!-- Coupons Section End -->
 
     <div class="page-section">
         <div class="container">
-            <div class="row">
-                <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12 sticky-sidebar">
+            <div class="row">                <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12 sticky-sidebar">
                     
-                    <div class="filter-wrapper">
+                    <div class="filter-wrapper" style="background: #ffffff; border: 1px solid #dddddd; border-radius: 4px; padding: 15px; margin-bottom: 15px;">
                         <div class="categories-menu">
-                            <h6><i class="icon-restaurant_menu"></i>Categories</h6>
-                            <ul class="menu-list">
+                            <h6 style="color: #333333; margin-bottom: 12px; font-size: 14px; font-weight: 600; border-bottom: 1px solid #eeeeee; padding-bottom: 8px;">
+                                <i class="icon-restaurant_menu" style="color: #777777; margin-right: 6px;"></i>Categories
+                            </h6>
+                            <ul class="menu-list" style="list-style: none; padding: 0; margin: 0;">
                                 {% for category in categories %}
-                                <li class="active"><a href="#" class="menu-category-link"> {{ category }} </a></li>
+                                <li style="margin-bottom: 2px;">
+                                    <a href="#menu-category-{{ category.id }}" class="menu-category-link" style="display: block; padding: 8px 12px; color: #555555; text-decoration: none; border-radius: 3px; transition: all 0.2s ease; font-size: 13px; border: 1px solid transparent;">
+                                        {{ category }}
+                                    </a>
+                                </li>
                                 {% endfor %}
                             </ul>
                         </div>
@@ -91,33 +144,42 @@
                                 <div class="menu-itam-holder">
                                     
                                     <div id="menu-item-list-6272" class="menu-itam-list">
-                                        
-                                        {% for category in categories %}
-                                        <div class="element-title" id="menu-category-2">
-                                            <h5 class="text-color">{{ category }}</h5>
-                                            <span>{{ category.description }}</span>
+                                                          {% for category in categories %}
+                        <div class="element-title" id="menu-category-{{ category.id }}" style="margin: 20px 0 15px 0; padding: 12px 0; border-bottom: 2px solid #f5f5f5;">
+                            <h5 style="color: #333333; margin: 0; font-size: 18px; font-weight: 600;">{{ category }}</h5>
+                            {% if category.description %}
+                            <span style="color: #777777; font-size: 13px; margin-top: 4px; display: block;">{{ category.description }}</span>
+                            {% endif %}
+                        </div>
+                        <ul style="list-style: none; padding: 0; margin: 0 0 30px 0;">
+                            {% for food in category.fooditems.all %}
+                            <li class="menu-item" style="background: #ffffff; border: 1px solid #eeeeee; border-radius: 6px; margin-bottom: 12px; padding: 15px; transition: all 0.2s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <div class="image-holder" style="flex-shrink: 0; width: 80px; height: 80px; border-radius: 6px; overflow: hidden; border: 1px solid #dddddd;">
+                                        <img src="{{ food.image.url }}" alt="{{ food }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                    </div>
+                                    <div class="text-holder" style="flex: 1; min-width: 0;">
+                                        <h6 style="color: #333333; margin: 0 0 6px 0; font-size: 16px; font-weight: 600; line-height: 1.3;">{{ food }}</h6>
+                                        {% if food.description %}
+                                        <span style="color: #666666; font-size: 13px; line-height: 1.4; display: block;">{{ food.description }}</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="price-holder" style="flex-shrink: 0; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
+                                        <span class="price" style="color: #333333; font-size: 16px; font-weight: 600;">₹{{ food.price }}</span>                                        <div style="display: flex; align-items: center; gap: 12px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 25px; padding: 6px 12px; min-width: 120px; justify-content: space-between;">                                            <a href="#" class="decrease_cart btn-cart-action" data-id="{{ food.id }}" data-url="{% url 'decrease_cart' food.id %}" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: #ffffff; border: 2px solid #dddddd; border-radius: 50%; color: #666666; text-decoration: none; transition: all 0.2s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative;">
+                                                <i class="icon-minus" style="font-size: 14px; font-weight: bold; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); line-height: 1;"></i>
+                                            </a>
+                                            <label id="qty-{{food.id}}" style="min-width: 32px; text-align: center; margin: 0; color: #333333; font-weight: 700; font-size: 16px; background: #ffffff; border-radius: 4px; padding: 4px 8px; border: 1px solid #eeeeee;">0</label>
+                                            <a href="#" class="add_to_cart btn-cart-action" data-id="{{ food.id }}" data-url="{% url 'add_to_cart' food.id %}" data-name="{{ food }}" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: #337ab7; border: 2px solid #337ab7; border-radius: 50%; color: white; text-decoration: none; transition: all 0.2s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.1); position: relative;">
+                                                <i class="icon-plus4" style="font-size: 14px; font-weight: bold; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); line-height: 1;"></i>
+                                            </a>
                                         </div>
-                                        <ul>
-                                            {% for food in category.fooditems.all %}
-                                            <li>
-                                                <div class="image-holder"> <img src="{{ food.image.url }}" alt=""></div>
-                                                <div class="text-holder">
-                                                    <h6>{{ food }}</h6>
-                                                    <span>{{ food.description }}</span>
-                                                </div>
-                                                <div class="price-holder">
-                                                    <span class="price">₹{{ food.price }}</span>
-
-                                                    <a href="#" class="decrease_cart" data-id="{{ food.id }}" data-url="{% url 'decrease_cart' food.id %}" style="margin-right: 28px;"><i class="icon-minus text-color"></i></a>
-                                                    <label id="qty-{{food.id}}">0</label>
-                                                    <a href="#" class="add_to_cart" data-id="{{ food.id }}" data-url="{% url 'add_to_cart' food.id %}"><i class="icon-plus4 text-color"></i></a>
-                                                    
-                                                </div>
-                                            </li>
-                                            {% endfor %}
-                                            
-                                        </ul>
-                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </li>
+                            {% endfor %}
+                            
+                        </ul>
+                        {% endfor %}
                                         
                                     </div>
 
@@ -140,5 +202,419 @@
     </div>
 </div>
 <!-- Main Section End -->
+
+<style>
+/* Coupon Section Styles */
+.copy-coupon-btn:hover {
+    background: #5a6268 !important;
+}
+
+.coupon-card:hover {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+    border-color: #adb5bd;
+}
+
+.copy-success {
+    background: #28a745 !important;
+}
+
+.copy-success i {
+    animation: bounce 0.3s ease;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+}
+
+/* Categories Menu Styles */
+.menu-category-link:hover {
+    background: #f8f9fa !important;
+    border-color: #dee2e6 !important;
+    color: #333333 !important;
+    text-decoration: none !important;
+}
+
+.menu-category-link.active {
+    background: #337ab7 !important;
+    color: white !important;
+    border-color: #337ab7 !important;
+}
+
+/* Menu Items Styles */
+.menu-item:hover {
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1) !important;
+    border-color: #cccccc !important;
+    transform: translateY(-1px);
+}
+
+.btn-cart-action {
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+}
+
+.btn-cart-action i {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.btn-cart-action:hover {
+    transform: scale(1.15) !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
+}
+
+.btn-cart-action:hover i {
+    transform: translate(-50%, -50%) !important;
+}
+
+.decrease_cart:hover {
+    background: #ffffff !important;
+    border-color: #adb5bd !important;
+    color: #495057 !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15) !important;
+}
+
+.add_to_cart:hover {
+    background: #2c5aa0 !important;
+    border-color: #2c5aa0 !important;
+    box-shadow: 0 2px 6px rgba(51, 122, 183, 0.3) !important;
+}
+
+.btn-cart-action:active {
+    transform: scale(0.95) !important;
+    transition: transform 0.1s ease !important;
+}
+
+/* Improved quantity display */
+.qty-display {
+    background: #ffffff !important;
+    border: 1px solid #eeeeee !important;
+    transition: all 0.2s ease !important;
+}
+
+.qty-display.updated {
+    background: #e8f4f8 !important;
+    border-color: #337ab7 !important;
+    animation: qtyUpdate 0.4s ease !important;
+}
+
+@keyframes qtyUpdate {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); background: #337ab7; color: white; }
+    100% { transform: scale(1); }
+}
+
+/* Cart Animation */
+.cart-added {
+    animation: cartPulse 0.3s ease;
+}
+
+@keyframes cartPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .coupon-card {
+        min-width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    .menu-item {
+        padding: 12px !important;
+    }
+    
+    .menu-item > div {
+        flex-direction: column !important;
+        text-align: center !important;
+        gap: 12px !important;
+    }
+    
+    .menu-item .image-holder {
+        width: 100px !important;
+        height: 100px !important;
+        margin: 0 auto !important;
+    }
+    
+    .menu-item .text-holder {
+        text-align: center !important;
+    }
+    
+    .menu-item .price-holder {
+        width: 100% !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-direction: row !important;
+        gap: 15px !important;
+    }
+    
+    .menu-item .price-holder > div {
+        min-width: 140px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .sticky-sidebar {
+        margin-bottom: 20px;
+    }
+    
+    .filter-wrapper {
+        margin-bottom: 10px !important;
+    }
+    
+    .menu-item .price-holder {
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+    
+    .menu-item .price-holder > div {
+        min-width: 160px !important;
+        padding: 8px 16px !important;
+    }
+      .btn-cart-action {
+        width: 36px !important;
+        height: 36px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: relative !important;
+    }
+    
+    .btn-cart-action i {
+        font-size: 16px !important;
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        line-height: 1 !important;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Copy coupon code functionality
+    document.querySelectorAll('.copy-coupon-btn').forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const couponCode = this.getAttribute('data-code');
+            const originalText = this.innerHTML;
+            
+            // Create temporary input element to copy text
+            const tempInput = document.createElement('input');
+            tempInput.value = couponCode;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            
+            try {
+                document.execCommand('copy');
+                
+                // Show success feedback
+                this.innerHTML = '<i class="fa fa-check"></i> COPIED';
+                this.classList.add('copy-success');
+                
+                // Show simple alert notification
+                showSimpleAlert('Coupon code "' + couponCode + '" copied!');
+                
+                // Reset button after 1.5 seconds
+                setTimeout(() => {
+                    this.innerHTML = originalText;
+                    this.classList.remove('copy-success');
+                }, 1500);
+                
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                showSimpleAlert('Failed to copy coupon code');
+            }
+            
+            document.body.removeChild(tempInput);
+        });
+    });
+    
+    // Category navigation
+    document.querySelectorAll('.menu-category-link').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Remove active class from all links
+            document.querySelectorAll('.menu-category-link').forEach(function(l) {
+                l.classList.remove('active');
+            });
+            
+            // Add active class to clicked link
+            this.classList.add('active');
+            
+            // Scroll to category
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+                targetElement.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start',
+                    inline: 'nearest'
+                });
+            }
+        });
+    });
+      // Add to cart functionality
+    document.querySelectorAll('.add_to_cart').forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const foodId = this.getAttribute('data-id');
+            const foodName = this.getAttribute('data-name');
+            const url = this.getAttribute('data-url');
+            
+            // Add visual feedback to button
+            this.classList.add('cart-added');
+            
+            // Update quantity display with animation
+            const qtyLabel = document.getElementById('qty-' + foodId);
+            if (qtyLabel) {
+                let currentQty = parseInt(qtyLabel.textContent) || 0;
+                qtyLabel.textContent = currentQty + 1;
+                qtyLabel.classList.add('updated');
+                
+                // Remove animation class after animation completes
+                setTimeout(() => {
+                    qtyLabel.classList.remove('updated');
+                }, 400);
+            }
+            
+            // Show success message
+            showSimpleAlert('✓ ' + foodName + ' added to cart!', 'success');
+            
+            // Remove button animation class
+            setTimeout(() => {
+                this.classList.remove('cart-added');
+            }, 300);
+        });
+    });
+    
+    // Decrease cart functionality
+    document.querySelectorAll('.decrease_cart').forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const foodId = this.getAttribute('data-id');
+            const url = this.getAttribute('data-url');
+            
+            // Update quantity display with animation
+            const qtyLabel = document.getElementById('qty-' + foodId);
+            if (qtyLabel) {
+                let currentQty = parseInt(qtyLabel.textContent) || 0;
+                if (currentQty > 0) {
+                    qtyLabel.textContent = currentQty - 1;
+                    qtyLabel.classList.add('updated');
+                    
+                    // Add visual feedback to button
+                    this.style.transform = 'scale(0.9)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                    
+                    // Show info message
+                    showSimpleAlert('Item removed from cart', 'info');
+                    
+                    // Remove animation class after animation completes
+                    setTimeout(() => {
+                        qtyLabel.classList.remove('updated');
+                    }, 400);
+                } else {
+                    // Show warning if trying to decrease when quantity is 0
+                    showSimpleAlert('No items to remove', 'warning');
+                }
+            }
+        });
+    });
+    
+    // Simple alert notification function
+    function showSimpleAlert(message, type = 'default') {
+        // Remove existing alert if any
+        const existingAlert = document.querySelector('.simple-alert');
+        if (existingAlert) {
+            existingAlert.remove();
+        }
+        
+        // Set colors based on type
+        let backgroundColor, textColor;
+        switch(type) {
+            case 'success':
+                backgroundColor = '#28a745';
+                textColor = 'white';
+                break;
+            case 'info':
+                backgroundColor = '#17a2b8';
+                textColor = 'white';
+                break;
+            case 'warning':
+                backgroundColor = '#ffc107';
+                textColor = '#333';
+                break;
+            case 'error':
+                backgroundColor = '#dc3545';
+                textColor = 'white';
+                break;
+            default:
+                backgroundColor = '#333';
+                textColor = 'white';
+        }
+        
+        // Create alert element
+        const alert = document.createElement('div');
+        alert.className = 'simple-alert';
+        alert.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${backgroundColor};
+            color: ${textColor};
+            padding: 12px 16px;
+            border-radius: 4px;
+            font-size: 13px;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            max-width: 300px;
+            word-wrap: break-word;
+        `;
+        alert.textContent = message;
+        
+        document.body.appendChild(alert);
+        
+        // Animate in
+        setTimeout(() => {
+            alert.style.opacity = '1';
+            alert.style.transform = 'translateY(0)';
+        }, 100);
+        
+        // Animate out and remove
+        setTimeout(() => {
+            alert.style.opacity = '0';
+            alert.style.transform = 'translateY(-20px)';
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.parentNode.removeChild(alert);
+                }
+            }, 300);
+        }, 2500);
+    }
+});
+</script>
 
 {% endblock %}
